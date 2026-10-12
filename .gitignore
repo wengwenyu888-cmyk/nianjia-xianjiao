@@ -58,6 +58,8 @@ tmp/
 backend/pytest-cache-files-*/
 
 # ---------- 本机杂项（非本项目文件，禁止入库，尤其公有仓库）----------
+opencode-AGENTS.md
+
 .tmp-asar/
 _plugin-audit/
 _removed-skills-backup/
