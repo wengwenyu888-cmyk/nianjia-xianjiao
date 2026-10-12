@@ -1,14 +1,17 @@
 <script setup lang="ts">
-// 价目表：按 sku_id 与 date 过滤查询（§8.2 GET /prices）+ 新增价目（生效区间）
+// 价目表：sku_id（非必填）与 date 过滤查询（§8.2 GET /prices）+ 新增价目（生效区间）
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 
 import {
   createPrice,
   getPrices,
+  getSkus,
   type Price,
   type PricePayload,
-  type PriceType
+  type PriceQuery,
+  type PriceType,
+  type Sku
 } from '@/api/store'
 
 /** 价格类型：purchase 采购价 / transfer 内部调拨价 */
@@ -22,11 +25,36 @@ function priceTypeText(v: PriceType): string {
   return priceTypeOptions.find((it) => it.value === v)?.label ?? v
 }
 
-// ---- 查询条件（sku_id + date 查历史当时价） ----
+// ---- 查询条件（sku_id 非必填 + date 查历史当时价；不选 SKU 即查全部价目并分页） ----
 const query = reactive<{ sku_id: number | undefined; date: string }>({
   sku_id: undefined,
   date: ''
 })
+
+// ---- SKU 下拉数据源 ----
+const skuOptions = ref<Sku[]>([])
+const skuLoading = ref(false)
+
+/** SKU 下拉/表格展示名：优先取已加载列表，未命中回退 SKU #id */
+function skuLabel(id: number | null | undefined): string {
+  if (id === null || id === undefined) return '—'
+  const hit = skuOptions.value.find((s) => s.id === id)
+  return hit ? hit.sku_no + ' ' + hit.name : 'SKU #' + id
+}
+
+/** 拉取 SKU 下拉（page_size 上限 200，超出请改用搜索式下拉） */
+async function loadSkuOptions(): Promise<void> {
+  skuLoading.value = true
+  try {
+    const res = await getSkus({ page: 1, page_size: 200 })
+    skuOptions.value = res.list
+  } catch {
+    // 拉不到 SKU 只影响下拉可选项，不阻塞价目查询
+    skuOptions.value = []
+  } finally {
+    skuLoading.value = false
+  }
+}
 
 // ---- 列表状态 ----
 const loading = ref(false)
@@ -40,10 +68,19 @@ const dialogVisible = ref(false)
 const saving = ref(false)
 const formRef = ref<FormInstance>()
 
+/** 新增价目表单模型：sku_id 用 null 表示未选，提交时再组装为 PricePayload */
+interface PriceForm {
+  sku_id: number | null
+  price_type: PriceType
+  price: number
+  effective_from: string
+  effective_to: string | null
+}
+
 /** 新增价目表单初值：生效止留空表示现行有效 */
-function emptyForm(): PricePayload {
+function emptyForm(): PriceForm {
   return {
-    sku_id: 0,
+    sku_id: null,
     price_type: 'purchase',
     price: 0,
     effective_from: '',
@@ -51,13 +88,13 @@ function emptyForm(): PricePayload {
   }
 }
 
-const form = reactive<PricePayload>(emptyForm())
+const form = reactive<PriceForm>(emptyForm())
 
 /** 表单校验：SKU/类型/单价/生效起始必填，单价为正数 */
 const rules: FormRules = {
   sku_id: [
-    { required: true, message: '请输入 SKU ID', trigger: 'change' },
-    { type: 'number', min: 1, message: 'SKU ID 需为正整数', trigger: 'change' }
+    { required: true, message: '请选择 SKU', trigger: 'change' },
+    { type: 'number', min: 1, message: '请选择有效的 SKU', trigger: 'change' }
   ],
   price_type: [{ required: true, message: '请选择价格类型', trigger: 'change' }],
   price: [
@@ -70,13 +107,17 @@ const rules: FormRules = {
 /** 分页查询；后端未连通时 request.ts 已提示，这里仅置空列表保证页面可用 */
 async function fetchList(): Promise<void> {
   loading.value = true
+  // 修复点：SKU 非必填。只有选中数字型 SKU 才带上 sku_id；
+  // 空值（undefined / null / '' / NaN）一律不传，避免后端参数校验 40000 与空串参数。
+  const params: PriceQuery = { page: page.value, page_size: pageSize.value }
+  if (typeof query.sku_id === 'number' && Number.isFinite(query.sku_id)) {
+    params.sku_id = query.sku_id
+  }
+  if (query.date) {
+    params.date = query.date
+  }
   try {
-    const res = await getPrices({
-      page: page.value,
-      page_size: pageSize.value,
-      sku_id: query.sku_id,
-      date: query.date || undefined
-    })
+    const res = await getPrices(params)
     list.value = res?.list ?? []
     total.value = res?.total ?? 0
   } catch {
@@ -120,7 +161,14 @@ async function submitForm(): Promise<void> {
   if (!valid) return
   saving.value = true
   try {
-    await createPrice({ ...form, effective_to: form.effective_to || null })
+    const payload: PricePayload = {
+      sku_id: Number(form.sku_id),
+      price_type: form.price_type,
+      price: form.price,
+      effective_from: form.effective_from,
+      effective_to: form.effective_to || null
+    }
+    await createPrice(payload)
     ElMessage.success('价目已新增')
     dialogVisible.value = false
     await fetchList()
@@ -131,7 +179,10 @@ async function submitForm(): Promise<void> {
   }
 }
 
-onMounted(fetchList)
+onMounted(() => {
+  void fetchList()
+  void loadSkuOptions()
+})
 </script>
 
 <template>
@@ -143,13 +194,21 @@ onMounted(fetchList)
 
     <el-card shadow="never">
       <div class="toolbar">
-        <el-input-number
+        <el-select
           v-model="query.sku_id"
-          :min="1"
-          :precision="0"
-          placeholder="SKU ID"
-          style="width: 150px"
-        />
+          filterable
+          clearable
+          :loading="skuLoading"
+          placeholder="SKU（不选 = 全部价目）"
+          style="width: 250px"
+        >
+          <el-option
+            v-for="sku in skuOptions"
+            :key="sku.id"
+            :label="sku.sku_no + ' ' + sku.name"
+            :value="sku.id"
+          />
+        </el-select>
         <el-date-picker
           v-model="query.date"
           type="date"
@@ -165,7 +224,10 @@ onMounted(fetchList)
 
       <el-table v-loading="loading" :data="list" border stripe>
         <el-table-column prop="id" label="ID" width="90" />
-        <el-table-column prop="sku_id" label="SKU ID" width="110" />
+        <el-table-column prop="sku_id" label="SKU ID" width="100" />
+        <el-table-column label="SKU" min-width="180">
+          <template #default="{ row }">{{ skuLabel(row.sku_id) }}</template>
+        </el-table-column>
         <el-table-column label="价格类型" width="110">
           <template #default="{ row }">
             <el-tag :type="row.price_type === 'purchase' ? 'primary' : 'success'" effect="light">
@@ -183,6 +245,9 @@ onMounted(fetchList)
             <el-tag v-else type="success" effect="plain">现行有效</el-tag>
           </template>
         </el-table-column>
+        <template #empty>
+          <el-empty :image-size="80" description="没有符合条件的价目，可清空 SKU 查全部" />
+        </template>
       </el-table>
 
       <el-pagination
@@ -200,8 +265,15 @@ onMounted(fetchList)
 
     <el-dialog v-model="dialogVisible" title="新增价目" width="560px" destroy-on-close>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
-        <el-form-item label="SKU ID" prop="sku_id">
-          <el-input-number v-model="form.sku_id" :min="1" :precision="0" style="width: 100%" />
+        <el-form-item label="SKU" prop="sku_id">
+          <el-select v-model="form.sku_id" filterable placeholder="选择 SKU" style="width: 100%">
+            <el-option
+              v-for="sku in skuOptions"
+              :key="sku.id"
+              :label="sku.sku_no + ' ' + sku.name"
+              :value="sku.id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="价格类型" prop="price_type">
           <el-select v-model="form.price_type" placeholder="请选择价格类型" style="width: 100%">

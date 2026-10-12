@@ -486,13 +486,15 @@ def delete_supplier(db: Session, supplier_id: int, *, operator_id: int | None = 
 def list_prices(
     db: Session,
     *,
-    sku_id: int,
+    sku_id: int | None = None,
     on_date: date | None = None,
     page: int = 1,
     page_size: int = 20,
 ) -> PageResult[Price]:
-    """查历史当时价：date 命中生效区间 [effective_from, effective_to]（NULL=现行有效）。"""
-    conditions = [_not_deleted(Price), Price.sku_id == sku_id]
+    """查价目：sku_id 缺省返回全部价目；date 命中生效区间 [effective_from, effective_to]（NULL=现行有效）。"""
+    conditions = [_not_deleted(Price)]
+    if sku_id is not None:
+        conditions.append(Price.sku_id == sku_id)
     if on_date is not None:
         conditions.append(Price.effective_from <= on_date)
         conditions.append(or_(Price.effective_to.is_(None), Price.effective_to >= on_date))

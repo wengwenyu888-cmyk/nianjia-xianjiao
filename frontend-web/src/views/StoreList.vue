@@ -108,6 +108,12 @@ function openCreate(): void {
   dialogVisible.value = true
 }
 
+/**
+ * Element 表格插槽 row 类型收窄：el-table 的 #default 插槽 row 是 DefaultRow，
+ * 直接传给具体类型函数会触发 TS2345，故统一在模板调用处收窄一次。
+ */
+const asStore = (row: unknown): Store => row as Store
+
 function openEdit(row: Store): void {
   dialogMode.value = 'edit'
   editingId.value = row.id
@@ -193,7 +199,7 @@ onMounted(fetchList)
         </el-table-column>
         <el-table-column label="操作" width="100" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
+            <el-button link type="primary" @click="openEdit(asStore(row))">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>

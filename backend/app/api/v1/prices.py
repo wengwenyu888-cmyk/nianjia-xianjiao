@@ -51,13 +51,15 @@ def list_prices(
     pagination: Pagination,
     user: CurrentUser,
     service: MasterService,
-    sku_id: Annotated[int, Query(gt=0, description="SKU id")],
     _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.PRICE_READ))],
+    sku_id: Annotated[
+        int | None, Query(gt=0, description="SKU id，缺省返回全部价目")
+    ] = None,
     on_date: Annotated[
         date | None, Query(alias="date", description="YYYY-MM-DD，命中生效区间")
     ] = None,
 ) -> ApiResponse[PricePage]:
-    """GET /prices?sku_id=&date=：date 缺省时不限生效区间，返回全部历史价。"""
+    """GET /prices?sku_id=&date=：都不传时返回全部价目（分页）；date 缺省不限生效区间。"""
     result = service.list_prices(
         db,
         sku_id=sku_id,

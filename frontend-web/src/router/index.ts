@@ -41,6 +41,49 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/PriceList.vue'),
     meta: { title: '价目表' }
   },
+  // ---- 业务作业（§8.2 要货 / 汇总分拣 / 配送签收 / 报损 / 对账核算）----
+  {
+    path: '/orders',
+    name: 'order-board',
+    component: () => import('@/views/OrderBoard.vue'),
+    meta: { title: '门店要货' }
+  },
+  {
+    path: '/summaries',
+    name: 'summary-page',
+    component: () => import('@/views/SummaryPage.vue'),
+    meta: { title: '要货汇总' }
+  },
+  {
+    path: '/picking',
+    name: 'picking-page',
+    component: () => import('@/views/PickingPage.vue'),
+    meta: { title: '分拣管理' }
+  },
+  {
+    path: '/deliveries',
+    name: 'delivery-page',
+    component: () => import('@/views/DeliveryPage.vue'),
+    meta: { title: '配送调度' }
+  },
+  {
+    path: '/driver-tasks',
+    name: 'driver-tasks',
+    component: () => import('@/views/DriverTasks.vue'),
+    meta: { title: '司机任务' }
+  },
+  {
+    path: '/losses',
+    name: 'loss-page',
+    component: () => import('@/views/LossPage.vue'),
+    meta: { title: '报损' }
+  },
+  {
+    path: '/reconcile',
+    name: 'reconcile-page',
+    component: () => import('@/views/ReconcilePage.vue'),
+    meta: { title: '对账与KPI' }
+  },
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',

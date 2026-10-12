@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // 首页：骨架阶段用欢迎页确认三端与后端连通；展示当前登录用户与桌面客户端下载入口
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { health } from '@/api'
@@ -13,12 +13,73 @@ const userStore = useUserStore()
 const apiStatus = ref('检测中…')
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1'
 
-const links = [
-  { title: '要货汇总', desc: '按门店/商品维度汇总当日要货量' },
-  { title: '分拣管理', desc: '生成分拣单并记录实际分拣数量' },
-  { title: '配送调度', desc: '派车派单，司机端查看配送任务' },
-  { title: '签收对账', desc: '电子签收、差异上报与门店盈亏对账' }
+/**
+ * 业务入口：to 与 router 中 /orders…/reconcile 一一对应，roles 为可见角色
+ * （§8.3 权限点集合的角色简写）。只放已实现的页面，未实现的入口不再保留死链。
+ */
+interface BusinessEntry {
+  to: string
+  title: string
+  desc: string
+  roles: string[]
+}
+
+const businessEntries: BusinessEntry[] = [
+  {
+    to: '/orders',
+    title: '门店要货',
+    desc: '选配送日、采纳 AI 建议、提交并确认要货单',
+    roles: ['admin', 'ops', 'store_manager']
+  },
+  {
+    to: '/summaries',
+    title: '要货汇总',
+    desc: '按配送日汇总已确认要货单（SKU × 总量）',
+    roles: ['admin', 'ops']
+  },
+  {
+    to: '/picking',
+    title: '分拣管理',
+    desc: '按门店生成分拣单，批次 FIFO 落定',
+    roles: ['admin', 'ops']
+  },
+  {
+    to: '/deliveries',
+    title: '配送调度',
+    desc: '派车派单，装车与发车跟踪',
+    roles: ['admin', 'ops']
+  },
+  {
+    to: '/driver-tasks',
+    title: '司机任务',
+    desc: '今日配送任务、发车与电子签收',
+    roles: ['admin', 'ops', 'driver']
+  },
+  {
+    to: '/losses',
+    title: '报损',
+    desc: '门店提交报损与总部审批扣减',
+    roles: ['admin', 'ops', 'store_manager']
+  },
+  {
+    to: '/reconcile',
+    title: '对账与KPI',
+    desc: '周期对账、门店盈亏与损耗率',
+    roles: ['admin', 'ops']
+  }
 ]
+
+/** 按当前角色过滤业务入口：admin/ops 全部可见，store_manager 见要货/报损，driver 见司机任务 */
+const visibleEntries = computed<BusinessEntry[]>(() => {
+  const codes = userStore.roleCodes
+  return businessEntries.filter((item) => item.roles.some((r) => codes.includes(r)))
+})
+
+/** 主数据入口仅 admin/ops 可见：§8.3 的 master:* 权限点不授予门店/司机，避免点进去 40300 */
+const canManageMaster = computed<boolean>(() => {
+  const codes = userStore.roleCodes
+  return codes.includes('admin') || codes.includes('ops')
+})
 
 /** 主数据管理入口，与 router 中 /stores、/skus、/suppliers、/prices 一一对应 */
 const masterNavs = [
@@ -114,8 +175,8 @@ onMounted(async () => {
         </div>
       </section>
 
-      <!-- 主数据导航：白卡片 + 极浅阴影，hover 上浮 2px + 主色描边 -->
-      <section class="nav-section">
+      <!-- 主数据导航：白卡片 + 极浅阴影，hover 上浮 2px + 主色描边（admin/ops 可见） -->
+      <section v-if="canManageMaster" class="nav-section">
         <h2 class="section-title">主数据</h2>
         <div class="nav-cards">
           <router-link v-for="nav in masterNavs" :key="nav.to" :to="nav.to" class="nav-card">
@@ -141,12 +202,17 @@ onMounted(async () => {
         </p>
       </section>
 
-      <!-- 业务入口卡片 -->
-      <section class="feature-section">
-        <div v-for="item in links" :key="item.title" class="feature-card card">
-          <h3>{{ item.title }}</h3>
-          <p class="muted">{{ item.desc }}</p>
+      <!-- 业务入口：白卡片 + hover 上浮；按当前用户角色显示，点进对应页面 -->
+      <section class="nav-section">
+        <h2 class="section-title">业务作业</h2>
+        <div v-if="visibleEntries.length > 0" class="feature-section">
+          <router-link v-for="item in visibleEntries" :key="item.to" :to="item.to" class="feature-card card">
+            <h3>{{ item.title }}</h3>
+            <p class="muted">{{ item.desc }}</p>
+            <span class="feature-arrow" aria-hidden="true">→</span>
+          </router-link>
         </div>
+        <el-empty v-else :image-size="80" description="当前账号未匹配到业务入口，请联系管理员分配角色权限" />
       </section>
     </div>
   </div>
@@ -365,16 +431,30 @@ onMounted(async () => {
   margin-top: 10px;
 }
 
-/* ---- 业务入口卡片：同款白卡片 + hover 上浮 ---- */
+/* ---- 业务入口卡片：router-link 白卡片 + hover 上浮 ---- */
 .feature-section {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
-  margin-top: 56px;
 }
 .feature-card {
+  position: relative;
+  display: block;
   padding: 26px 24px;
+  color: var(--nf-ink);
+  text-decoration: none;
   transition: transform 0.2s ease, border-color 0.2s, box-shadow 0.2s;
+}
+.feature-card:hover {
+  text-decoration: none;
+}
+/* 入口箭头：品牌绿点缀（Apple 式克制，只此一处） */
+.feature-arrow {
+  position: absolute;
+  top: 24px;
+  right: 22px;
+  color: var(--nf-green);
+  font-size: 18px;
 }
 .feature-card:hover {
   transform: translateY(-2px);
@@ -409,8 +489,7 @@ onMounted(async () => {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .nav-section,
-  .download,
-  .feature-section {
+  .download {
     margin-top: 40px;
   }
 }
