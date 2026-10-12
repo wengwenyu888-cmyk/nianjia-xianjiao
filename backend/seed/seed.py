@@ -88,6 +88,7 @@ PERMISSIONS: list[tuple[str, str]] = [
     ("sign:read", "签收单详情"),
     ("loss:create", "门店提交报损"),
     ("loss:read", "报损查询"),
+    ("stock:read", "批次库存与流水查询(含临期/低库存预警)"),
     ("stock:adjust", "审批报损/盘点差异并扣批次库存(写流水)"),
     ("reconcile:generate", "按周期生成对账单"),
     ("reconcile:read", "对账查询"),
@@ -135,6 +136,7 @@ _OPS_CODES = [
     "delivery:read",
     "sign:read",
     "loss:read",
+    "stock:read",
     "stock:adjust",
     "reconcile:read",
     "report:profit",
@@ -696,8 +698,8 @@ def seed_orders(
 # --------------------------------------------------------------------------- #
 def _validate_definition() -> None:
     """离线自检：权限点 38 条、角色映射引用的 code 均存在。"""
-    if len(PERMISSIONS) != 38:
-        raise RuntimeError(f"permission 清单应为 38 条，当前 {len(PERMISSIONS)} 条")
+    if len(PERMISSIONS) != 39:
+        raise RuntimeError(f"permission 清单应为 39 条，当前 {len(PERMISSIONS)} 条")
     codes = {code for code, _ in PERMISSIONS}
     if len(codes) != len(PERMISSIONS):
         raise RuntimeError("permission code 存在重复")

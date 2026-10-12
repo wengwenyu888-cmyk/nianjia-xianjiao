@@ -84,6 +84,19 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/ReconcilePage.vue'),
     meta: { title: '对账与KPI' }
   },
+  // ---- 采购与库存（§8.2 采购端点 + 库存端点）----
+  {
+    path: '/purchase',
+    name: 'purchase-page',
+    component: () => import('@/views/PurchasePage.vue'),
+    meta: { title: '采购管理' }
+  },
+  {
+    path: '/stock',
+    name: 'stock-page',
+    component: () => import('@/views/StockPage.vue'),
+    meta: { title: '库存管理' }
+  },
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',

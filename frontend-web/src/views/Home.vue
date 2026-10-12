@@ -26,6 +26,12 @@ interface BusinessEntry {
 
 const businessEntries: BusinessEntry[] = [
   {
+    to: '/purchase',
+    title: '采购管理',
+    desc: '向供应商下单、收货入库并生成批次库存',
+    roles: ['admin', 'ops']
+  },
+  {
     to: '/orders',
     title: '门店要货',
     desc: '选配送日、采纳 AI 建议、提交并确认要货单',
@@ -41,6 +47,12 @@ const businessEntries: BusinessEntry[] = [
     to: '/picking',
     title: '分拣管理',
     desc: '按门店生成分拣单，批次 FIFO 落定',
+    roles: ['admin', 'ops']
+  },
+  {
+    to: '/stock',
+    title: '库存管理',
+    desc: '批次库存、临期与低库存预警、批次流水',
     roles: ['admin', 'ops']
   },
   {

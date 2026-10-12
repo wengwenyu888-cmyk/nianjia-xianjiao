@@ -49,6 +49,7 @@ class PurchaseOrder(Base, IdMixin, AuditMixin, SoftDeleteMixin):
         server_default="draft",
     )
     expect_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, comment="预计到货")
+    remark: Mapped[str | None] = mapped_column(String(255), nullable=True, comment="备注")
     idempotency_key: Mapped[str | None] = mapped_column(String(64), nullable=True, comment="幂等键")
     version: Mapped[int] = mapped_column(
         INT_UNSIGNED, nullable=False, default=0, server_default=text("0")

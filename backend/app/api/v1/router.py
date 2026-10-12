@@ -22,6 +22,7 @@ from app.api.v1 import (
     orders,
     picking,
     prices,
+    purchase,
     skus,
     stores,
     summary,
@@ -54,6 +55,9 @@ api_router.include_router(agent.router, prefix="/agent", tags=["智能体建议"
 # 汇总分拣（§8.2）：POST /summaries/generate、GET /summaries、POST /picks、POST /picks/{id}/complete
 api_router.include_router(summary.router, prefix="/summaries", tags=["汇总"])
 api_router.include_router(picking.router, prefix="/picks", tags=["分拣"])
+
+# 采购（§8.2）：POST /purchase-orders、GET /purchase-orders、POST /purchase-orders/{id}/receive
+api_router.include_router(purchase.router, prefix="/purchase-orders", tags=["采购"])
 
 
 def _include_optional(module_name: str, *, prefix: str, probe: str, tags: list[str]) -> None:
@@ -110,3 +114,13 @@ def _include_optional_extra(
 _include_optional_extra(
     "settlement", "stores_router", prefix="/stores", tags=["对账核算-门店报表"]
 )
+
+# 库存（并行开发中）：GET /stocks、GET /stocks/alerts、GET /stock-flows
+# stock_api.router 内部自带 /stocks 与 /stock-flows 全路径，故不叠加 prefix。
+try:
+    from app.api.v1 import stock as stock_api
+
+    api_router.include_router(stock_api.router, tags=["库存"])
+    logger.info("已注册路由模块 app.api.v1.stock")
+except ImportError as exc:
+    logger.warning("库存路由模块尚未就绪，暂不注册：%s", exc)
