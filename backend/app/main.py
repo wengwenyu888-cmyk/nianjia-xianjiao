@@ -6,8 +6,8 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,21 +16,9 @@ from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import get_logger, setup_logging
+from app.core.rate_limit import limiter
 
 logger = get_logger(__name__)
-
-# 可选限流依赖：slowapi 缺失或初始化失败时降级为不限流，保证骨架始终可启动
-limiter = None
-_slowapi = None
-try:  # pragma: no cover - 取决于依赖是否安装
-    import slowapi
-    from slowapi import Limiter
-    from slowapi.util import get_remote_address
-
-    _slowapi = slowapi
-    limiter = Limiter(key_func=get_remote_address, default_limits=[settings.RATE_LIMIT_DEFAULT])
-except ModuleNotFoundError:  # pragma: no cover
-    logger.warning("未安装 slowapi，接口限流已跳过")
 
 
 @asynccontextmanager
@@ -78,8 +66,8 @@ def create_app() -> FastAPI:
         allow_headers=["Authorization", "Content-Type", "X-Request-Id"],
     )
 
-    # 限流：slowapi 可用时挂到 app.state，业务接口再用限流装饰器精细化阈值
-    if limiter is not None and _slowapi is not None:
+    # 限流：slowapi 可用时挂到 app.state（与业务装饰器共用同一实例）
+    if limiter is not None:
         application.state.limiter = limiter
         register_rate_limit_handler(application)
 

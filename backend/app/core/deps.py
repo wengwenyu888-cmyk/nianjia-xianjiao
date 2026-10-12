@@ -93,6 +93,54 @@ def _unauthorized(detail: str) -> HTTPException:
     )
 
 
+def load_user_by_id(db: Session, user_id: int) -> User | None:
+    """按 id 加载「未软删且启用」的用户；数据口径与登录校验保持一致。"""
+    return db.execute(
+        select(User).where(
+            User.id == user_id,
+            User.deleted_at == SOFT_DELETE_SENTINEL,
+            User.status == 1,
+        )
+    ).scalar_one_or_none()
+
+
+def load_user_by_username(db: Session, username: str) -> User | None:
+    """按登录名加载「未软删且启用」的用户；软删/停用一律视为不存在（防枚举）。"""
+    return db.execute(
+        select(User).where(
+            User.username == username,
+            User.deleted_at == SOFT_DELETE_SENTINEL,
+            User.status == 1,
+        )
+    ).scalar_one_or_none()
+
+
+def load_user_authorities(db: Session, user_id: int) -> tuple[list[str], list[str]]:
+    """取用户角色码与权限点码并集（user→user_role→role_permission→permission）。
+
+    Returns:
+        (roles, permissions)：角色码列表；权限点码去重排序后的列表。
+    """
+    roles = list(
+        db.scalars(
+            select(Role.code)
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(UserRole.user_id == user_id, Role.status == 1)
+        ).all()
+    )
+    granted: set[str] = set(
+        db.scalars(
+            select(Permission.code)
+            .join(RolePermission, RolePermission.permission_id == Permission.id)
+            .join(UserRole, UserRole.role_id == RolePermission.role_id)
+            .where(UserRole.user_id == user_id, Permission.status == 1)
+        ).all()
+    )
+    for role_code in roles:
+        granted.update(code.value for code in ROLE_PERMISSIONS.get(role_code, frozenset()))
+    return roles, sorted(granted)
+
+
 def get_current_user(
     db: DbSession,
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)] = None,
@@ -119,33 +167,11 @@ def get_current_user(
         raise _unauthorized("令牌类型不正确")
 
     user_id = int(payload["sub"])
-    user = db.execute(
-        select(User).where(
-            User.id == user_id,
-            User.deleted_at == SOFT_DELETE_SENTINEL,
-            User.status == 1,
-        )
-    ).scalar_one_or_none()
+    user = load_user_by_id(db, user_id)
     if user is None:
         raise _unauthorized("用户不存在或已停用")
 
-    roles = list(
-        db.scalars(
-            select(Role.code)
-            .join(UserRole, UserRole.role_id == Role.id)
-            .where(UserRole.user_id == user.id, Role.status == 1)
-        ).all()
-    )
-    granted: set[str] = set(
-        db.scalars(
-            select(Permission.code)
-            .join(RolePermission, RolePermission.permission_id == Permission.id)
-            .join(UserRole, UserRole.role_id == RolePermission.role_id)
-            .where(UserRole.user_id == user.id, Permission.status == 1)
-        ).all()
-    )
-    for role_code in roles:
-        granted.update(code.value for code in ROLE_PERMISSIONS.get(role_code, frozenset()))
+    roles, permissions = load_user_authorities(db, user.id)
 
     return {
         "user_id": user.id,
@@ -154,7 +180,7 @@ def get_current_user(
         "store_id": user.store_id,  # 数据范围：非 NULL 时查询强制注入本店条件
         "role": payload.get("role", ""),
         "roles": roles,
-        "permissions": sorted(granted),
+        "permissions": permissions,
     }
 
 
@@ -193,6 +219,16 @@ def get_master_service() -> Any:
 
 
 MasterService = Annotated[Any, Depends(get_master_service)]
+
+
+def get_auth_service() -> Any:
+    """认证服务提供者：登录校验与 JWT 签发；测试可整体替换为 fake。"""
+    from app.service import auth_service
+
+    return auth_service
+
+
+AuthService = Annotated[Any, Depends(get_auth_service)]
 
 
 # --------------------------------------------------------------------------- 分页

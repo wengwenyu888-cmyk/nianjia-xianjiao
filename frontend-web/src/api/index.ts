@@ -3,6 +3,9 @@ import service, { request } from '@/api/request'
 
 export { request, service }
 
+// 认证模块接口出口（登录 / 当前用户）
+export * from './auth'
+
 // 主数据模块接口出口（§8.2 主数据端点：门店 / SKU / 供应商 / 价目表）
 export * from './store'
 

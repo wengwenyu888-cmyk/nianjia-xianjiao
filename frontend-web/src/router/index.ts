@@ -1,7 +1,15 @@
-// 路由表 + 登录守卫骨架
+// 路由表 + 登录守卫
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
+import { getToken } from '@/api/request'
+
 const routes: RouteRecordRaw[] = [
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/Login.vue'),
+    meta: { title: '登录' }
+  },
   {
     path: '/',
     name: 'home',
@@ -46,12 +54,20 @@ const router = createRouter({
   routes
 })
 
-// 登录守卫骨架：token 缺失跳登录页（登录页与鉴权接口接入后启用）
-router.beforeEach((to, _from, next) => {
+// 全局前置守卫：无 token 只能进 /login；有 token 访问 /login 直接回首页
+router.beforeEach((to) => {
   const title = (to.meta?.title as string | undefined) ?? ''
   document.title = title ? title + ' - 念家鲜饺供应链' : '念家鲜饺供应链'
-  // TODO(登录模块接入后): 无 token 且目标页非白名单 → next('/login')
-  next()
+
+  const token = getToken()
+  if (token && to.path === '/login') {
+    return { path: '/' }
+  }
+  if (!token && to.path !== '/login') {
+    // 带上来源地址，登录成功后由 Login.vue 回跳
+    return { path: '/login', query: { redirect: to.fullPath } }
+  }
+  return true
 })
 
 export default router

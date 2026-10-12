@@ -7,12 +7,15 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.v1 import health, prices, skus, stores, suppliers
+from app.api.v1 import auth, health, prices, skus, stores, suppliers
 
 api_router = APIRouter()
 
 # 健康检查（无需鉴权）
 api_router.include_router(health.router)
+
+# 认证（§8.2）：登录签发 JWT / 当前用户与权限点
+api_router.include_router(auth.router, prefix="/auth", tags=["认证"])
 
 # 主数据（§8.2）：门店 / SKU / 供应商 / 价目
 api_router.include_router(stores.router, prefix="/stores", tags=["主数据-门店"])
@@ -21,7 +24,6 @@ api_router.include_router(suppliers.router, prefix="/suppliers", tags=["主数�
 api_router.include_router(prices.router, prefix="/prices", tags=["主数据-价目"])
 
 # 业务模块按落地顺序逐步接入（当前为骨架占位）：
-# api_router.include_router(auth.router, prefix="/auth", tags=["认证"])
 # api_router.include_router(orders.router, prefix="/orders", tags=["要货单"])
 # api_router.include_router(summary.router, prefix="/summary", tags=["总部汇总"])
 # api_router.include_router(picking.router, prefix="/picking", tags=["分拣单"])

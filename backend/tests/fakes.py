@@ -13,9 +13,18 @@ from collections.abc import Iterable
 from datetime import date, datetime
 from decimal import Decimal
 from types import SimpleNamespace
-from typing import Any
+from typing import Annotated, Any
 
-from app.core.deps import get_current_user, get_db, get_master_service
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials
+
+from app.core.deps import (
+    bearer_scheme,
+    get_auth_service,
+    get_current_user,
+    get_db,
+    get_master_service,
+)
 from app.main import app
 from app.service.store_service import PageResult
 
@@ -165,3 +174,70 @@ def install_overrides(
         "store_id": store_id,
         "permissions": [str(code) for code in permissions],
     }
+
+
+class FakeAuthService:
+    """假认证服务：不连库、不依赖 jose / passlib，只验证 api 层的 40100 分支。
+
+    passwords：口令正确的用户；deleted_users：模拟已软删/停用的用户（口令对也拒绝）。
+    """
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, str]] = []
+        self.passwords: dict[str, str] = {"zhangsan": "St0re#2026"}
+        self.deleted_users: set[str] = {"lisi"}
+        self.token = "fake-jwt-token"
+        self.profile: dict[str, Any] = {
+            "id": 7,
+            "username": "zhangsan",
+            "display_name": "张三",
+            "store_id": 3,
+            "role_codes": ["store_manager"],
+            "permission_codes": ["master:store:read", "order:create"],
+        }
+
+    def authenticate(self, db: Any, username: str, password: str) -> dict[str, Any] | None:
+        """镜像真实服务语义：不存在 / 软删 / 口令错误一律 None。"""
+        self.calls.append((username, password))
+        if username in self.deleted_users:
+            return None
+        expected = self.passwords.get(username)
+        if expected is None or password != expected:
+            return None
+        return {"token": self.token, "token_type": "bearer", "user": dict(self.profile)}
+
+
+def install_auth_overrides(
+    auth_service: Any,
+    *,
+    profile: dict[str, Any] | None = None,
+) -> None:
+    """认证接口测试替身：替换 auth service，并让 get_current_user 真实校验 Bearer。
+
+    与 install_overrides 的差别：这里不直接返回固定用户，而是先检查 Authorization 头，
+    这样「/auth/me 必须带 Bearer」才有可断言的 40100（不解析 JWT，故无需 jose）。
+    """
+    current = profile or {
+        "user_id": 7,
+        "username": "zhangsan",
+        "name": "张三",
+        "role": "store",
+        "roles": ["store_manager"],
+        "store_id": 3,
+        "permissions": ["master:store:read"],
+    }
+
+    def fake_current_user(
+        credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)] = None,
+    ) -> dict[str, Any]:
+        if credentials is None or not credentials.credentials:
+            raise HTTPException(
+                status_code=401,
+                detail="未登录或缺少访问令牌",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return current
+
+    app.dependency_overrides[get_db] = lambda: None
+    app.dependency_overrides[get_auth_service] = lambda: auth_service
+    app.dependency_overrides[get_current_user] = fake_current_user

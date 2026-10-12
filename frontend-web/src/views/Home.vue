@@ -1,8 +1,13 @@
 <script setup lang="ts">
-// 首页：骨架阶段用欢迎页确认三端与后端连通
+// 首页：骨架阶段用欢迎页确认三端与后端连通；展示当前登录用户与桌面客户端下载入口
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import { health } from '@/api'
+import { useUserStore } from '@/stores/user'
+
+const router = useRouter()
+const userStore = useUserStore()
 
 const apiStatus = ref('检测中…')
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1'
@@ -22,6 +27,26 @@ const masterNavs = [
   { to: '/prices', title: '价目表' }
 ]
 
+/** 角色码 -> 中文标签；未知角色码原样展示，避免后端新增角色时前端显示空白 */
+const ROLE_LABELS: Record<string, string> = {
+  admin: '管理员',
+  ops: '运营',
+  hq: '总部',
+  store: '门店',
+  store_manager: '店长',
+  driver: '司机'
+}
+
+function roleText(code: string): string {
+  return ROLE_LABELS[code] ?? code
+}
+
+/** 退出登录：清 store + localStorage 后回登录页 */
+async function handleLogout(): Promise<void> {
+  userStore.logout()
+  await router.push('/login')
+}
+
 onMounted(async () => {
   try {
     const res = await health()
@@ -29,14 +54,43 @@ onMounted(async () => {
   } catch {
     apiStatus.value = '后端未连通（请确认 uvicorn 已启动）'
   }
+
+  // 有 token 但本地无用户信息（例如换了浏览器标签或缓存被清）时补拉一次
+  if (userStore.isLoggedIn && !userStore.user) {
+    try {
+      await userStore.fetchMe()
+    } catch {
+      // token 失效时 request.ts 已清 token 并跳登录页
+    }
+  }
 })
 </script>
 
 <template>
   <div class="home">
     <el-card shadow="never" class="banner">
-      <h1>念家鲜饺供应链</h1>
-      <p class="subtitle">门店要货 → 总部汇总 → 分拣 → 配送 → 签收 → 对账 一体化后台</p>
+      <div class="banner-head">
+        <div>
+          <h1>念家鲜饺供应链</h1>
+          <p class="subtitle">门店要货 → 总部汇总 → 分拣 → 配送 → 签收 → 对账 一体化后台</p>
+        </div>
+        <div class="user-box">
+          <template v-if="userStore.isLoggedIn">
+            <span class="user-name">{{ userStore.displayName }}</span>
+            <el-tag
+              v-for="code in userStore.roleCodes"
+              :key="code"
+              size="small"
+              type="danger"
+              effect="light"
+            >
+              {{ roleText(code) }}
+            </el-tag>
+            <el-button link type="primary" @click="handleLogout">退出登录</el-button>
+          </template>
+          <router-link v-else to="/login" class="login-link">去登录</router-link>
+        </div>
+      </div>
       <div class="status">
         <el-tag :type="apiStatus.includes('正常') ? 'success' : 'info'" effect="light">
           {{ apiStatus }}
@@ -50,6 +104,24 @@ onMounted(async () => {
       <router-link v-for="nav in masterNavs" :key="nav.to" :to="nav.to" class="nav-link">
         {{ nav.title }}
       </router-link>
+    </el-card>
+
+    <!--
+      桌面客户端下载入口。
+      /downloads/ 为占位路径：安装包由服务器 nginx 以静态目录托管
+      （见 deploy/nginx.conf），正式发布后替换为真实文件名，
+      例如 /downloads/njxj-setup-v1.0.0.exe。
+    -->
+    <el-card shadow="never" class="download">
+      <div class="download-head">
+        <h3>下载桌面客户端（Windows）</h3>
+        <a href="/downloads/" target="_blank" rel="noopener" class="download-link">
+          <el-button type="primary" plain>前往下载页</el-button>
+        </a>
+      </div>
+      <p class="muted">
+        桌面客户端为同一份网页的 Electron 打包，功能与浏览器访问一致，安装包由服务器 nginx 提供下载。
+      </p>
     </el-card>
 
     <el-row :gutter="16" class="grid">
@@ -70,6 +142,28 @@ onMounted(async () => {
 .banner h1 {
   margin: 0 0 8px;
   font-size: 24px;
+}
+.banner-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+.user-name {
+  font-weight: 600;
+  color: #303133;
+}
+.login-link {
+  color: #409eff;
+  text-decoration: none;
 }
 .subtitle {
   color: #606266;
@@ -101,6 +195,26 @@ onMounted(async () => {
 }
 .nav-link:hover {
   text-decoration: underline;
+}
+.download {
+  margin-top: 16px;
+}
+.download-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.download-head h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.download-link {
+  text-decoration: none;
+}
+.download p {
+  margin: 8px 0 0;
 }
 .grid {
   margin-top: 16px;

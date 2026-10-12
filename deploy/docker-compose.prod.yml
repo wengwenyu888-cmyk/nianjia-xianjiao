@@ -1,0 +1,122 @@
+# ============================================================================
+# 念家鲜饺供应链系统 —— 生产编排（单机形态）
+# 目标机型：百度云 BCC，Ubuntu 22.04，2 vCPU / 1.3GB 内存 / 40GB 磁盘 + 2GB swap
+# 使用（在仓库根目录执行）：
+#   docker compose -f deploy/docker-compose.prod.yml up -d --build
+# 变量：全部来自 deploy/.env（复制 deploy/.env.example 后填值；.env 严禁入库）
+# 内存预算：mysql 400m + backend 400m + nginx 100m ≈ 900m，其余留给系统与页缓存
+# ============================================================================
+name: nianjia-xianjiao-prod
+
+services:
+  # --------------------------------------------------------------------------
+  # MySQL 8.4：与后端同机，仅走 compose 内部网络，不映射任何宿主端口
+  # --------------------------------------------------------------------------
+  mysql:
+    image: mysql:8.4
+    container_name: njxj-prod-mysql
+    # always：单机没有编排器接管，容器崩溃或宿主重启后必须自动恢复
+    restart: always
+    environment:
+      # :? 语法 = 变量缺失直接报错退出，避免用空密码初始化出一个危险实例
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?deploy/.env 缺少 MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?deploy/.env 缺少 MYSQL_DATABASE}
+      # 应用专用账号：后端不用 root 连库，最小权限；与 backend 的 DB_USER/DB_PASSWORD 同源
+      MYSQL_USER: ${DB_USER:?deploy/.env 缺少 DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?deploy/.env 缺少 DB_PASSWORD}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      # 命名卷：数据与容器生命周期解耦，down/up 不丢库（只有删卷才丢）
+      - mysql-data:/var/lib/mysql
+      # 低内存参数；:ro 防止容器内进程篡改配置
+      - ./mysql/custom.cnf:/etc/mysql/conf.d/custom.cnf:ro
+    # 故意不写 ports：数据库只允许同网络内的 backend 访问，绝不出现在宿主/公网
+    healthcheck:
+      # mysqladmin ping：官方镜像自带，无需额外装包；密码经容器环境读取，不落配置文件
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      # 首次初始化（建库建账号）在 1.3GB 机器上较慢，给足 60s 再判定失败
+      start_period: 60s
+    # 1.3GB 总内存下，InnoDB buffer pool 128M + 各类会话缓冲的合理上限
+    mem_limit: 400m
+    logging: &default-logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks: [njxj-net]
+
+  # --------------------------------------------------------------------------
+  # 后端 FastAPI：镜像来自 deploy/Dockerfile，只在内部网络被 nginx 反代
+  # --------------------------------------------------------------------------
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ../deploy/Dockerfile
+    container_name: njxj-prod-backend
+    restart: always
+    depends_on:
+      mysql:
+        # healthcheck 通过后才启动，避免启动瞬间连库失败直接退出
+        condition: service_healthy
+    environment:
+      ENV: ${ENV:-prod}
+      DEBUG: "false"
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      # 走 compose 内部 DNS 的服务名，不经过宿主端口（数据库未映射到宿主）
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_USER: ${DB_USER:?deploy/.env 缺少 DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD:?deploy/.env 缺少 DB_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE:?deploy/.env 缺少 MYSQL_DATABASE}
+      # 至少 32 字节；app/core/config.py 中长度不足会拒绝启动
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?deploy/.env 缺少 JWT_SECRET_KEY}
+      CORS_ORIGINS: ${CORS_ORIGINS:?deploy/.env 缺少 CORS_ORIGINS}
+      TZ: ${TZ:-Asia/Shanghai}
+    # 启动即迁移：单实例下幂等安全，避免忘记手动 alembic upgrade 导致缺表
+    command: ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+    # 只对同网络暴露 8000，不映射宿主端口；公网只能经 nginx 的 /api 进入
+    expose:
+      - "8000"
+    mem_limit: 400m
+    logging: *default-logging
+    networks: [njxj-net]
+
+  # --------------------------------------------------------------------------
+  # nginx：托管前端 dist + 反代 /api，唯一对公网开放的入口（80）
+  # --------------------------------------------------------------------------
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: njxj-prod-nginx
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      # 唯一映射到宿主的端口；HTTPS/443 由证书方案另行接管
+      - "80:80"
+    volumes:
+      # 前端构建产物直接挂载（dist 不烘焙进镜像，便于只重发前端）
+      - ../frontend-web/dist:/usr/share/nginx/html:ro
+      # 覆盖镜像默认站点配置
+      - ./nginx-prod.conf:/etc/nginx/conf.d/default.conf:ro
+    mem_limit: 100m
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/nginx-health >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging: *default-logging
+    networks: [njxj-net]
+
+networks:
+  # 独立 bridge 网络：服务间用服务名互访，与宿主机其他容器隔离
+  njxj-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    # 显式命名：docker volume ls 一眼可辨，误删排查明确
+    name: njxj-prod-mysql-data
