@@ -1,19 +1,80 @@
-# ---- DSH 运行时 / 敏感数据：绝不入库 ----
-.dsh/
-*.local.md
-
-# ---- 大体积、且不应外传：已移除的第三方 skill 备份 ----
-# 这是本地回滚用的安全网（53 个 skill / 48 MB），不是项目内容。
-# 留在磁盘上用于一键还原，但不进版本库，避免仓库膨胀或将第三方内容发布到远端。
-_removed-skills-backup/
-
-# ---- 隐私数据 ----
-*.credentials*
+# ---------- 密钥与凭据（底线：一律不入库）----------
 .env
 .env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+*.p12
 
-# ---- 系统与编辑器 ----
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# ---------- Node / 前端 ----------
+node_modules/
+frontend-web/dist/
+frontend-web/.vite/
+pnpm-lock.yaml.tmp
+npm-debug.log*
+yarn-error.log*
+.eslintcache
+*.tsbuildinfo
+
+# 注意：pnpm-lock.yaml 与 backend/uv.lock 必须入库，保证 CI 与线上一致
+
+# ---------- IDE / 编辑器 ----------
+.idea/
+.vscode/
+*.swp
+*.swo
+.history/
+
+# ---------- 操作系统 ----------
+.DS_Store
 Thumbs.db
 desktop.ini
-.vscode/
-.idea/
+
+# ---------- 小程序 ----------
+miniapp/**/node_modules/
+project.private.config.json
+
+# ---------- 日志与临时文件 ----------
+*.log
+logs/
+tmp/
+.DS_Store
+
+# ---------- 本机杂项（非本项目文件，禁止入库，尤其公有仓库）----------
+.tmp-asar/
+_plugin-audit/
+_removed-skills-backup/
+_tmp/
+asar-extract/
+decoded/
+jiameng/
+jm/
+jm_home.html
+jm_home2.html
+analyze-sessions.mjs
+asar-inspect.mjs
+decode-sessions.mjs
+probe-zen-entitlement.mjs
+verify-go-free-detail.mjs
+verify-go-free-final.mjs
+verify-go-free-models.mjs
+verify-go-free-stream-tools.mjs
+verify-opencode-free.mjs

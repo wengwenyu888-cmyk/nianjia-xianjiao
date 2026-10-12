@@ -1,0 +1,19 @@
+<view class="page">
+  <view class="card">
+    <view class="row-between">
+      <text class="store-name">{{storeName}}</text>
+      <text class="muted">{{today}}</text>
+    </view>
+    <text class="muted">状态：{{apiStatus}}</text>
+  </view>
+
+  <view class="card" wx:for="{{shortcuts}}" wx:key="title" bindtap="goOrder">
+    <view class="row-between">
+      <view>
+        <text class="item-title">{{item.title}}</text>
+        <view class="muted">{{item.desc}}</view>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+</view>

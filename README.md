@@ -1,69 +1,127 @@
-# default-workspace
+# 念家鲜饺供应链系统（nianjia-xianjiao）
 
-DeepSeek Harness（DSH）的默认工作区。
+门店要货到签收对账的闭环系统：门店按「斤」要货 → 总部汇总 → 分拣称重 → 司机配送 →
+门店电子签收 → 门店盈亏对账。
 
-- **DSH 版本**：0.2.0-rc.2（Desktop 桌面版）
-- **安装位置**：`D:\DeepSeek Harness`
-- **DSH 配置目录**：`C:\Users\wengw\.dsh`
-
----
-
-## 目录结构
-
-| 路径 | 内容 | 是否入库 |
-|---|---|---|
-| `_healthcheck\DSH-学习方案.md` | DSH 新手学习方案（含官方依据与交叉验证） | ✅ |
-| `_healthcheck\official-docs-digest.md` | 随包官方文档摘要（279 份 README 的消化，含官方原文引用） | ✅ |
-| `recycle_i_records.csv` 等 | OpenClaw 残留取证原始数据 | ✅ |
-| `_removed-skills-backup\` | 已移除的 53 个第三方 skill 备份（48 MB） | ❌ 见 `.gitignore` |
+- 技术栈：FastAPI（Python 3.12）+ MySQL 8 + Vue3 / Element Plus + 微信小程序（原生，门店端 + 司机端）
+- 部署定稿：轻量应用服务器 + Docker 起步，数据库用云 RDS MySQL；门店量增长后再迁 TKE
+- 仓库：GitHub 私有仓库；规范以 `docs/05-工程基座方案.md` 为唯一权威
 
 ---
 
-## 关于 `_removed-skills-backup`
+## 1. 目录说明
 
-2026-10-12，53 个由其他 AI 工具（OpenClaw 体系）带入的 skill 被从
-`C:\Users\wengw\.agents\skills` 移除，DSH 由此恢复到官方初始状态。
-
-移除方式是**移动而非删除**，备份包含：
-
-| 文件 | 说明 |
-|---|---|
-| `skills\` | 53 个 skill 文件夹，原样保留 |
-| `manifest-*.csv` | 53 行清单，含文件数、字节数、`SKILL.md` 的 SHA-256 |
-| `REMOVAL-RECORD.md` | 完整移除记录与恢复说明 |
-| `skill-lock.json.bak` | 原来源溯源记录 |
-
-**还原方法**（在本机终端执行）：
-
-```powershell
-$src = 'C:\Users\wengw\.agents\skills'
-$payload = 'C:\Users\wengw\Documents\deepseek-harness\default-workspace\_removed-skills-backup\20261012-093104\skills'
-Get-ChildItem $payload -Directory | ForEach-Object {
-    Move-Item -LiteralPath $_.FullName -Destination (Join-Path $src $_.Name)
-}
+```text
+backend/        FastAPI 服务（总部 API，三端共用）
+  app/api/      路由层：只做参数校验、鉴权、调 service、组响应
+  app/core/     横切：config / security / deps / logging / exceptions
+  app/model/    SQLAlchemy ORM（表结构唯一事实源）
+  app/schema/   Pydantic 契约（统一响应、分页、枚举）
+  app/service/  业务逻辑（唯一事务边界、状态机、幂等）
+  app/integration/ 外部对接（银豹 / 金蝶 / 管家婆 / LLM）
+  app/utils/    纯函数（单位换算等）
+  alembic/      数据库迁移（只前进不回滚）
+  tests/        pytest：unit + api（TestClient）
+frontend-web/   Vue3 + Element Plus 总部后台（Vite + Pinia + vue-router）
+miniapp/        微信小程序：store/（门店端）driver/（司机端）utils/（共享请求封装）
+deploy/         Dockerfile、docker-compose.yml、nginx.conf、.env.example
+docs/           业务手册、架构设计、里程碑、工程基座方案
 ```
 
-> ⚠️ 该备份**刻意不入库**：它体积大，且一旦推送到远端等于把已清除的第三方内容重新发布。
+分层铁律（详见 docs/05 第 1 节）：`api` 不写 SQL 与业务判断；`service` 是唯一事务边界；
+`model` 不被 `api` 直接导入；对外一律返回 schema，禁止直接返回 ORM 对象。
 
 ---
 
-## 关于 DSH 的项目根
+## 2. 本地启动（三端）
 
-DSH 把**包含 `.git` 的最近祖先目录**认作「项目根」。本目录初始化 Git 后，
-以下两个位置随之生效（官方机制）：
+### 2.0 前置
 
-| rank | 位置 | 作用 |
-|---|---|---|
-| 100 | `.dsh\skills\` | **本项目专属** skill（优先级最高） |
-| — | `AGENTS.md` | **项目级**指令，叠加在全局 `~\.dsh\AGENTS.md` 之上（更具体者优先） |
+Git、Python 3.12、[uv](https://docs.astral.sh/uv/)、Node 20 + pnpm、微信开发者工具、Docker。
 
-> 全局约定见 `C:\Users\wengw\.dsh\AGENTS.md`；本文件所在目录的 `AGENTS.md` 若存在，
-> 其内容在**本项目内**优先。
+### 2.1 环境变量
+
+```bash
+copy .env.example .env                 # Windows
+cp .env.example .env                   # macOS / Linux
+copy backend\.env.example backend\.env
+copy frontend-web\.env.example frontend-web\.env.development
+copy deploy\.env.example deploy\.env
+```
+
+`.env` 已在 `.gitignore` 中，密钥（数据库密码 / JWT 密钥 / 微信 AppSecret / LLM Key）绝不入库。
+
+### 2.2 起 MySQL（本地中间件）
+
+```bash
+docker compose -f deploy/docker-compose.yml up -d mysql
+```
+
+### 2.3 后端
+
+```bash
+cd backend
+uv sync                                  # 按 uv.lock 装依赖
+uv run alembic upgrade head               # 迁移到最新（当前骨架无表，建库后即可跑通）
+uv run uvicorn app.main:app --reload --port 8000
+# 接口文档：http://127.0.0.1:8000/docs
+# 健康检查：http://127.0.0.1:8000/api/v1/health → {"code":0,...,"data":{"status":"ok"}}
+```
+
+测试与静态检查：
+
+```bash
+cd backend
+uv run pytest                 # 单元 + 接口测试（健康检查不连数据库）
+uv run ruff check .           # lint
+uv run ruff format --check .  # 格式
+uv run mypy app/core app/service
+```
+
+### 2.4 前端后台
+
+```bash
+cd frontend-web
+pnpm install
+pnpm dev                      # → http://127.0.0.1:5173
+pnpm type-check               # vue-tsc 类型检查
+pnpm lint
+pnpm build                    # 生产构建产物在 dist/
+```
+
+前端通过 `VITE_API_BASE_URL` 找后端；默认 `/api/v1` 走 Vite 代理到 `http://127.0.0.1:8000`。
+
+### 2.5 微信小程序
+
+1. 打开微信开发者工具 → 导入项目 → 目录选 `miniapp/`（`project.config.json` 已就位）。
+2. 门店端与司机端为**分包**：入口页分别为 `store/pages/index/index`、`driver/pages/tasks/tasks`；
+   在「编译模式」下拉框可直接切换（`project.config.json` 已预置 3 个编译条件）。
+3. 开发者工具中勾选「不校验合法域名」，本地直连 `http://127.0.0.1:8000`。
+4. 上线前：把 `miniapp/app.js` 的 `baseUrl` 改为 HTTPS 正式域名，并在微信后台配置 request 合法域名。
 
 ---
 
-## 一些约定
+## 3. 部署（轻量服务器 + Docker）
 
-- skill 一律放在 `~\.dsh\skills\`（用户级）或本项目 `.dsh\skills\`（项目级），
-  **不要**放进 `~\.agents\skills\`（多工具共享目录，会交叉污染）。
-- 提交前请确认 `_removed-skills-backup\` 与 `.dsh\` 未进入暂存区。
+```bash
+# 后端镜像（首次构建前需 cd backend && uv lock 生成 uv.lock）
+docker build -f deploy/Dockerfile -t nianjia-api:local ./backend
+
+# 本地一键起 backend + mysql
+docker compose -f deploy/docker-compose.yml up -d
+
+# 发布前必须单独跑迁移（不可依赖应用启动自动建表）
+docker compose -f deploy/docker-compose.yml exec backend uv run alembic upgrade head
+```
+
+前端静态资源：`pnpm build` 产物上传 COS + CDN；单机形态可用 `deploy/nginx.conf` 托管并反代 `/api`。
+
+---
+
+## 4. 当前骨架范围与后续落地顺序
+
+已就位：三端目录与可运行骨架、统一响应/异常/日志/配置/JWT 骨架、健康探针、迁移基座、部署文件。
+
+按 `docs/05` 第 7 节推进：① 仓库骨架 + CI 两 Job 跑绿 → ② core + 登录接口 + 迁移打通 →
+③ 主数据（门店 / SKU / 价目）→ ④ 主链路单据（要货 → 汇总 → 分拣 → 配送 → 签收 → 对账）→
+⑤ 云上部署一次并踩熟发布回滚。

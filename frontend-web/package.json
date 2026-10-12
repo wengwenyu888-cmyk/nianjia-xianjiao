@@ -1,0 +1,38 @@
+{
+  "name": "nianjia-xianjiao-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "念家鲜饺供应链系统 - 总部后台（Vue3 + Element Plus）",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "type-check": "vue-tsc --noEmit",
+    "lint": "eslint src/**/*.{ts,vue}",
+    "lint:fix": "eslint src/**/*.{ts,vue} --fix",
+    "format": "prettier --write src/**/*.{ts,vue,css,json}"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "dayjs": "^1.11.13",
+    "echarts": "^5.5.1",
+    "element-plus": "^2.8.4",
+    "pinia": "^2.2.4",
+    "vue": "^3.5.11",
+    "vue-router": "^4.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "eslint": "^9.11.1",
+    "eslint-plugin-vue": "^9.28.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.8.0",
+    "unplugin-auto-import": "^0.18.3",
+    "unplugin-vue-components": "^0.27.4",
+    "vite": "^5.4.8",
+    "vue-tsc": "^2.1.6"
+  }
+}

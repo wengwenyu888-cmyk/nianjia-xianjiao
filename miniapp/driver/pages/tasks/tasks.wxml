@@ -1,0 +1,14 @@
+<view class="page">
+  <view class="card" wx:if="{{tasks.length === 0}}">
+    <view class="empty">今日暂无配送任务</view>
+  </view>
+
+  <view class="card" wx:for="{{tasks}}" wx:key="id">
+    <view class="row-between">
+      <text class="task-title">{{item.store_name || '门店'}}</text>
+      <text class="muted">{{item.delivery_date}}</text>
+    </view>
+    <view class="muted">{{item.address || '待补充地址'}}</view>
+    <button class="btn-primary" bindtap="goSign" data-id="{{item.id}}">去签收</button>
+  </view>
+</view>
