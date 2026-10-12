@@ -18,6 +18,7 @@
   "build": {
     "appId": "com.nianjia.xianjiao.desktop",
     "productName": "念家鲜饺",
+    "artifactName": "njxj-${version}-${name}.exe",
     "directories": { "output": "release" },
     "files": ["main.js", "preload.js", "package.json"],
     "extraResources": [
@@ -29,7 +30,8 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "念家鲜饺"
+      "shortcutName": "念家鲜饺",
+      "artifactName": "njxj-setup-${version}.exe"
     }
   }
 }

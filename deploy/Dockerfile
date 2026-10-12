@@ -4,12 +4,15 @@
 # ---------- 阶段 1：依赖构建 ----------
 FROM python:3.12-slim AS builder
 
-# uv 官方静态二进制（pip 源复制，避免因网络问题构建失败）
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+# 国内构建适配：不依赖 ghcr.io 的 uv 镜像，改用 pip 装 uv（清华源）；
+# PyPI 解析走清华镜像，可用 --build-arg 覆盖
+ARG PYPI_INDEX=https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install --no-cache-dir -i $PYPI_INDEX uv
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
-    UV_PYTHON_DOWNLOADS=never
+    UV_PYTHON_DOWNLOADS=never \
+    UV_DEFAULT_INDEX=$PYPI_INDEX
 
 WORKDIR /app
 

@@ -99,6 +99,8 @@ services:
     volumes:
       # 前端构建产物直接挂载（dist 不烘焙进镜像，便于只重发前端）
       - ../frontend-web/dist:/usr/share/nginx/html:ro
+      # 桌面安装包目录（electron-builder 产物放这里，经 /downloads/ 下载）
+      - ./downloads:/usr/share/nginx/html/downloads:ro
       # 覆盖镜像默认站点配置
       - ./nginx-prod.conf:/etc/nginx/conf.d/default.conf:ro
     mem_limit: 100m

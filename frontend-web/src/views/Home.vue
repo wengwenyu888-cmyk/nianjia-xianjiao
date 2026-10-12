@@ -107,16 +107,14 @@ onMounted(async () => {
     </el-card>
 
     <!--
-      桌面客户端下载入口。
-      /downloads/ 为占位路径：安装包由服务器 nginx 以静态目录托管
-      （见 deploy/nginx.conf），正式发布后替换为真实文件名，
-      例如 /downloads/njxj-setup-v1.0.0.exe。
+      桌面客户端下载入口：安装包由服务器 nginx 以 /downloads/ 静态目录托管，
+      真实文件为 deploy/downloads/njxj-0.1.0-nianjia-xianjiao-desktop.exe（portable 免安装版）。
     -->
     <el-card shadow="never" class="download">
       <div class="download-head">
         <h3>下载桌面客户端（Windows）</h3>
-        <a href="/downloads/" target="_blank" rel="noopener" class="download-link">
-          <el-button type="primary" plain>前往下载页</el-button>
+        <a href="/downloads/njxj-0.1.0-nianjia-xianjiao-desktop.exe" target="_blank" rel="noopener" class="download-link">
+          <el-button type="primary" plain>下载桌面客户端（约 96MB）</el-button>
         </a>
       </div>
       <p class="muted">
