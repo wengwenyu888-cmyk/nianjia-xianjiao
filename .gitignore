@@ -60,6 +60,12 @@ backend/pytest-cache-files-*/
 # ---------- 本机杂项（非本项目文件，禁止入库，尤其公有仓库）----------
 opencode-AGENTS.md
 .opencode-probe/
+_healthcheck/
+hash_verify*.csv
+intersection.txt
+recycle_i_records.csv
+s1only.txt
+verify.ps1
 
 .tmp-asar/
 _plugin-audit/
