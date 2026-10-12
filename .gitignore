@@ -58,6 +58,9 @@ logs/
 tmp/
 .DS_Store
 
+# ---------- 测试临时目录 ----------
+backend/pytest-cache-files-*/
+
 # ---------- 本机杂项（非本项目文件，禁止入库，尤其公有仓库）----------
 .tmp-asar/
 _plugin-audit/
