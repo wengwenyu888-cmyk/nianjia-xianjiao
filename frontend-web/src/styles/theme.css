@@ -1,82 +1,135 @@
 /**
- * 念家鲜饺供应链系统 · V2 全局主题
- * 设计依据：docs/07-品牌与设计规范.md（唯一权威色板）
- * 主色 #157fd1 / 深蓝 ink #0e346b / 天蓝 #0f92d2 / 蓝灰 #707c9d
- * 浅蓝雾 #7f97bc / 暖米底 #faf6f0 / 金黄点缀 #f5a623
- * 做法：仅覆盖 Element Plus CSS 变量，不引入新 UI 库
+ * 念家鲜饺供应链系统 · V3 全局主题（Apple 官网设计语言）
+ * 设计依据：docs/07-品牌与设计规范.md 第 2 节 V3 色板 + 第 3 节视觉原则（唯一权威）
+ * V3 色板：奶油白 cream #FBF6EA / 品牌绿 green #3E9B47 / 深绿 deep #2A7A38
+ *          亮绿 bright #56B85C / 嫩黄绿 lime #A9D95E / 金黄 gold #F0B429 / 近黑 ink #1A1A1A
+ * V2 蓝色板已作废。做法：仅覆盖 Element Plus CSS 变量 + 少量工具类，不引入新 UI 库。
+ *
+ * 主色派生（Element Plus 规则：light-N = 主色与白 mix，白占 N*10%）：
+ *   light-N 各通道 = C + (255 - C) * N/10
+ *   dark-2 = 主色与黑 mix，黑占 20% -> C * 0.8
+ * 主色 #3E9B47 = rgb(62, 155, 71)，据此手算下列数值并注释。
  */
 
 :root {
-  /* ---- 主色系列：按钮、链接、强调（light-N = 主色混白 N/10） ---- */
-  --el-color-primary: #157fd1;
-  --el-color-primary-light-3: #5ba5df; /* 混白 30%：hover / 描边 */
-  --el-color-primary-light-5: #8abfe8; /* 混白 50%：禁用态 */
-  --el-color-primary-light-7: #b9d9f1; /* 混白 70%：浅底 */
-  --el-color-primary-light-8: #d0e5f6; /* 混白 80%：浅底 / 卡片描边 */
-  --el-color-primary-light-9: #e8f2fa; /* 混白 90%：卡片浅底 / hover 背景 */
-  --el-color-primary-dark-2: #1166a7;  /* 混黑 20%：按下态 */
-  /* 供 rgba() 场景（阴影、遮罩）使用的 RGB 三元组，须与主色一致 */
-  --el-color-primary-rgb: 21, 127, 209;
+  /* ---- 主色系列：按钮、链接、强调 ---- */
+  --el-color-primary: #3E9B47;
+  --el-color-primary-light-3: #78B97E; /* 混白 30%：hover / 描边  R 62+(193*.3)=120 G 155+30=185 B 71+(184*.3)=126 */
+  --el-color-primary-light-5: #9FCDA3; /* 混白 50%：禁用态           R 159 G 205 B 163 */
+  --el-color-primary-light-7: #C5E1C8; /* 混白 70%：浅底             R 197 G 225 B 200 */
+  --el-color-primary-light-8: #D8EBDA; /* 混白 80%：浅底 / 卡片描边   R 216 G 235 B 218 */
+  --el-color-primary-light-9: #ECF5ED; /* 混白 90%：卡片浅底 / hover  R 236 G 245 B 237 */
+  --el-color-primary-dark-2: #327C39;  /* 混黑 20%：按下态           R 50 G 124 B 57 */
+  /* 供 rgba() 场景（阴影、遮罩、毛玻璃描边）使用的 RGB 三元组，须与主色一致 */
+  --el-color-primary-rgb: 62, 155, 71;
 
-  /* ---- 圆角与字体：圆角 8px 起，卡片 12px；字体走系统栈，不引外部字体 ---- */
+  /* ---- 圆角：Apple 式大圆角。按钮/输入 8px，卡片 16px ---- */
   --el-border-radius-base: 8px;
   --el-border-radius-small: 6px;
-  --el-font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+  --el-border-radius-round: 999px;
+  --el-card-border-radius: 16px;
 
-  /* ---- 页面底色：暖米底表达「家的温度」 ---- */
-  --el-bg-color-page: #faf6f0;
-  --el-fill-color-blank: #ffffff;
+  /* ---- 字体：系统默认栈，不引外部字体 ----
+   * 标题权重规范（docs/07 §3 大字号层级）：
+   *   页面主标题 32-48px / 800；区块标题 20-24px / 700；正文 14-15px / 400 */
+  --el-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
 
-  /* ---- 品牌语义色：供自定义样式引用，不在组件里硬编码新色 ---- */
-  --nf-primary: #157fd1;
-  --nf-ink: #0e346b;
-  --nf-sky: #0f92d2;
-  --nf-slate: #707c9d;
-  --nf-mist: #7f97bc;
-  --nf-cream: #faf6f0;
-  --nf-gold: #f5a623;
+  /* ---- 底色与卡片：奶油白页面 + 纯白卡片 + 柔和阴影 ---- */
+  --el-bg-color-page: #FBF6EA;
+  --el-bg-color: #FFFFFF;
+  --el-fill-color-blank: #FFFFFF;
+  --el-box-shadow-light: 0 8px 24px rgba(0, 0, 0, 0.06);
 
-  /* ---- 卡片圆角统一 12px（Element 默认 4px） ---- */
-  --el-card-border-radius: 12px;
+  /* ---- 文字与描边：近黑主文字，极浅描边（克制，少用分割线） ---- */
+  --el-text-color-primary: #1A1A1A;
+  --el-text-color-regular: #3C3C3C;
+  --el-text-color-secondary: #6B6B6B;
+  --el-border-color: rgba(26, 26, 26, 0.10);
+  --el-border-color-light: rgba(26, 26, 26, 0.08);
+  --el-border-color-lighter: rgba(26, 26, 26, 0.06);
 
-  /* ---- 侧边栏深蓝菜单：背景深蓝，菜单项文字白，激活项主蓝高亮 ---- */
-  --el-menu-bg-color: #0e346b;
+  /* ---- 表格：去掉重边框，表头奶油浅底，hover 极浅绿 ---- */
+  --el-table-border-color: rgba(26, 26, 26, 0.06);
+  --el-table-header-bg-color: #FBF8F0;
+  --el-table-header-text-color: #1A1A1A;
+  --el-table-row-hover-bg-color: #F3F8F2;
+
+  /* ---- 品牌语义变量（自定义样式统一引用，不在组件里硬编码新色） ---- */
+  --nf-cream: #FBF6EA;   /* 奶油白：页面底色 */
+  --nf-green: #3E9B47;   /* 品牌绿：主行动色 */
+  --nf-deep: #2A7A38;    /* 深绿：页头 / hover / 吉祥物底色 */
+  --nf-bright: #56B85C;  /* 亮绿：渐变搭档 / 成功态 */
+  --nf-lime: #A9D95E;    /* 嫩黄绿：辅助面 / 标签底 */
+  --nf-gold: #F0B429;    /* 金黄：强调点缀 / 角标 */
+  --nf-ink: #1A1A1A;     /* 近黑：主文字 */
+  --nf-muted: #8A8A8A;   /* 辅助文字 */
+
+  /* ---- 柔和阴影与毛玻璃导航变量 ---- */
+  --nf-shadow-card: 0 8px 24px rgba(0, 0, 0, 0.06);
+  --nf-shadow-card-hover: 0 12px 28px rgba(0, 0, 0, 0.08);
+  --nf-glass-bg: rgba(251, 246, 234, 0.8);
+  --nf-glass-blur: 16px;
+  --nf-glass-border: rgba(26, 26, 26, 0.06);
+
+  /* ---- 侧边栏菜单（V3 深绿，替代 V2 深蓝）：背景深绿，激活项品牌绿 ---- */
+  --el-menu-bg-color: #2A7A38;
   --el-menu-text-color: rgba(255, 255, 255, 0.85);
-  --el-menu-hover-text-color: #ffffff;
-  --el-menu-hover-bg-color: rgba(15, 146, 210, 0.22);
-  --el-menu-active-color: #ffffff;
+  --el-menu-hover-text-color: #FFFFFF;
+  --el-menu-hover-bg-color: rgba(169, 217, 94, 0.18);
+  --el-menu-active-color: #FFFFFF;
   --el-menu-border-color: transparent;
 }
 
-/* ---- 侧边栏激活项：主蓝高亮块（文字保持白色） ---- */
+/* ---- 卡片：16px 大圆角 + 纯白底 + 柔和阴影 ----
+ * 注意两点，否则卡片圆角不会生效为 16px：
+ * 1) Element Plus 在 .el-card 自身局部把 --el-card-border-radius 重新定义为 4px，遮蔽 :root 同名变量；
+ * 2) 按需引入的组件 CSS 属于懒加载 chunk，加载顺序晚于本文件，同等特异性下会覆盖本文件。
+ * 故这里用重复类名 .el-card.el-card 提高特异性，显式覆盖局部变量并直接给定圆角。 */
+.el-card.el-card {
+  --el-card-border-radius: 16px;
+  border-radius: 16px;
+  border: none;
+  box-shadow: var(--nf-shadow-card);
+}
+
+/* ---- 毛玻璃导航工具类（Apple 顶部导航：半透明 + backdrop-filter） ---- */
+.glass-nav {
+  background: var(--nf-glass-bg);
+  -webkit-backdrop-filter: blur(var(--nf-glass-blur));
+  backdrop-filter: blur(var(--nf-glass-blur));
+  border-bottom: 1px solid var(--nf-glass-border);
+}
+
+/* ---- 侧边栏激活项：品牌绿高亮块（文字保持白色） ---- */
 .el-menu-item.is-active,
 .el-sub-menu.is-active > .el-sub-menu__title {
-  background-color: var(--nf-primary);
+  background-color: var(--nf-green);
   color: #ffffff;
 }
 
-/* ---- 全局背景：暖米底，覆盖 html/body/#app ---- */
+/* ---- 全局背景：奶油白（覆盖 html/body/#app） ---- */
 html,
 body,
 #app {
   background-color: var(--nf-cream);
 }
 
-/* ---- 滚动条：仅做细节修饰，继承主题色，不另造组件 ---- */
+/* ---- 滚动条：细节修饰，继承品牌绿，不另造组件 ---- */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--nf-mist) transparent;
+  scrollbar-color: rgba(62, 155, 71, 0.35) transparent;
 }
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background-color: var(--nf-mist);
+  background-color: rgba(62, 155, 71, 0.35);
   border-radius: 8px;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background-color: var(--nf-primary);
+  background-color: var(--nf-green);
 }
 *::-webkit-scrollbar-track {
   background: transparent;

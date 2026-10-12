@@ -5,6 +5,7 @@ import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
+import mascotImg from '@/assets/mascot-green.png'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
@@ -42,132 +43,190 @@ async function handleLogin(): Promise<void> {
 </script>
 
 <template>
-  <!-- V2：蓝渐变背景 + 居中白卡片 + 饺子 logo + 品牌 slogan -->
+  <!-- V3：Apple 式双栏。左栏品牌视觉（深绿渐变 + 吉祥物），右栏奶油白表单 -->
   <div class="login-page">
-    <div class="login-card">
-      <!-- 饺子 logo：内联 SVG，两段圆弧拼出月牙饺身，金黄 #f5a623 勾出褶边（不引外部图片） -->
-      <div class="logo-mark" aria-hidden="true">
-        <svg viewBox="0 0 64 64" width="64" height="64" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="nfDumpling" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#0f92d2" />
-              <stop offset="100%" stop-color="#0e346b" />
-            </linearGradient>
-          </defs>
-          <!-- 饺身：上弧 + 下弧两段圆弧闭合 -->
-          <path d="M6 38 A26 26 0 0 1 58 38 A34 9 0 0 0 6 38 Z" fill="url(#nfDumpling)" />
-          <!-- 褶边：金黄弧线点缀 -->
-          <path
-            d="M13 33 Q32 20 51 33"
-            stroke="#f5a623"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            fill="none"
-          />
-          <circle cx="32" cy="22" r="2.2" fill="#f5a623" />
-        </svg>
+    <aside class="brand-pane">
+      <div class="mascot-frame">
+        <img class="mascot" :src="mascotImg" alt="念家鲜饺吉祥物" />
       </div>
+      <div class="brand-copy">
+        <div class="brand-name">念家鲜饺</div>
+        <p class="brand-slogan">吃鲜饺，想念家</p>
+      </div>
+    </aside>
 
-      <div class="brand">念家鲜饺</div>
-      <div class="slogan">吃鲜饺，想念家</div>
-      <div class="promise">馅不隔夜 · 现包现煮</div>
-      <div class="sub">供应链系统 · 总部统采统配平台</div>
+    <main class="form-pane">
+      <div class="form-card">
+        <h1 class="title">欢迎回来</h1>
+        <p class="subtitle">登录念家鲜饺供应链系统</p>
 
-      <el-form class="login-form" :model="form" label-position="top" @submit.prevent="handleLogin">
-        <el-form-item label="账号">
-          <el-input
-            v-model="form.username"
-            size="large"
-            placeholder="请输入工号 / 手机号"
-            autocomplete="username"
-            clearable
-          />
-        </el-form-item>
-        <el-form-item label="密码">
-          <el-input
-            v-model="form.password"
-            type="password"
-            size="large"
-            placeholder="请输入密码"
-            autocomplete="current-password"
-            show-password
-            @keyup.enter="handleLogin"
-          />
-        </el-form-item>
-      </el-form>
+        <el-form class="login-form" :model="form" label-position="top" @submit.prevent="handleLogin">
+          <el-form-item label="账号">
+            <el-input
+              v-model="form.username"
+              size="large"
+              placeholder="请输入工号 / 手机号"
+              autocomplete="username"
+              clearable
+            />
+          </el-form-item>
+          <el-form-item label="密码">
+            <el-input
+              v-model="form.password"
+              type="password"
+              size="large"
+              placeholder="请输入密码"
+              autocomplete="current-password"
+              show-password
+              @keyup.enter="handleLogin"
+            />
+          </el-form-item>
+        </el-form>
 
-      <el-button class="submit" type="primary" size="large" :loading="loading" @click="handleLogin">
-        登 录
-      </el-button>
+        <el-button class="submit" type="primary" size="large" :loading="loading" @click="handleLogin">
+          登 录
+        </el-button>
 
-      <div class="copy">© 2026 念家鲜饺 供应链系统</div>
-    </div>
+        <div class="copy">© 2026 念家鲜饺 供应链系统</div>
+      </div>
+    </main>
   </div>
 </template>
 
 <style scoped>
-/* 页面：天蓝 → 深蓝 对角渐变（docs/07：蓝 = 信赖与品质） */
+/* 页面：左右双栏，占满整屏，无滚动 */
 .login-page {
+  display: flex;
   min-height: 100vh;
+}
+
+/* ---- 左栏（桌面 55%）：深绿渐变 + 居中的吉祥物与品牌字 ----
+ * 深绿渐变：品牌绿 #3E9B47 → 深绿 #2A7A38（docs/07 V3 色板）。 */
+.brand-pane {
+  flex: 0 0 55%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 48px 40px;
+  background: linear-gradient(150deg, #3E9B47 0%, #2A7A38 100%);
+  overflow: hidden;
+}
+/* 吉祥物承载框：底色取图片实测底色 #2A7A38，图片与框无缝贴合，只保留大圆角 */
+.mascot-frame {
+  display: flex;
+  max-height: 60vh;
+  max-width: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #2A7A38;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+}
+.mascot {
+  display: block;
+  max-height: 60vh;
+  max-width: 100%;
+  width: auto;
+}
+.brand-copy {
+  text-align: center;
+}
+.brand-name {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: #ffffff;
+}
+.brand-slogan {
+  margin: 10px 0 0;
+  font-size: 15px;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* ---- 右栏（45%）：奶油白底 + 居中表单卡片 ---- */
+.form-pane {
+  flex: 1 1 45%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 40px 32px;
+  background: var(--nf-cream);
+}
+.form-card {
   box-sizing: border-box;
-  background: linear-gradient(135deg, #0f92d2 0%, #0e346b 100%);
-}
-/* 居中白卡片：12px 圆角 + 柔和阴影 */
-.login-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 380px;
+  padding: 40px 36px 28px;
+  border-radius: 20px;
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 18px 44px rgba(14, 52, 107, 0.28);
-  padding: 32px 28px 24px;
-  text-align: center;
+  box-shadow: var(--nf-shadow-card);
+  /* 极简输入框：无边框，底色灰白，聚焦时品牌绿描边 */
+  --el-input-bg-color: #f5f1e8;
+  --el-input-border-color: transparent;
+  --el-input-hover-border-color: transparent;
+  --el-input-focus-border-color: var(--nf-green);
+  --el-input-text-color: var(--nf-ink);
+  --el-input-placeholder-color: #a8a8a8;
 }
-.logo-mark {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 8px;
-}
-/* 品牌名：深蓝 ink，加粗 + 字距 */
-.brand {
-  font-size: 26px;
-  font-weight: 700;
-  color: #0e346b;
-  letter-spacing: 4px;
-}
-/* slogan：主色 */
-.slogan {
-  font-size: 15px;
-  font-weight: 600;
-  color: #157fd1;
-  letter-spacing: 2px;
-  margin-top: 8px;
-}
-/* 品牌承诺行：蓝灰辅助文字 */
-.promise {
-  font-size: 12px;
-  color: #707c9d;
+.title {
+  margin: 0 0 10px;
+  font-size: 32px;
+  font-weight: 800;
   letter-spacing: 1px;
-  margin-top: 6px;
+  color: var(--nf-ink);
 }
-.sub {
-  font-size: 12px;
-  color: #7f97bc;
-  margin-top: 10px;
+.subtitle {
+  margin: 0 0 28px;
+  font-size: 14px;
+  color: #6b6b6b;
 }
-.login-form {
-  margin-top: 24px;
-  text-align: left;
+.login-form :deep(.el-form-item__label) {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b6b6b;
+  padding-bottom: 6px;
+}
+.login-form :deep(.el-form-item) {
+  margin-bottom: 18px;
+}
+.login-form :deep(.el-input__wrapper) {
+  padding: 4px 14px;
+  border-radius: 10px;
+}
+.login-form :deep(.el-input__wrapper.is-focus) {
+  background: #ffffff;
 }
 .submit {
   width: 100%;
+  height: 46px;
+  margin-top: 6px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 4px;
 }
 .copy {
+  margin-top: 22px;
+  text-align: center;
   font-size: 12px;
-  color: #a8abb2;
-  margin-top: 20px;
+  color: #a8a8a8;
+}
+
+/* ---- 窄屏（<768px）：隐藏左栏，只留表单 ---- */
+@media (max-width: 767px) {
+  .brand-pane {
+    display: none;
+  }
+  .form-pane {
+    flex: 1 1 100%;
+    padding: 32px 20px;
+  }
+  .form-card {
+    padding: 32px 24px 24px;
+    box-shadow: none;
+    background: transparent;
+  }
 }
 </style>

@@ -15,8 +15,10 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-  /* 暖米底：家的温度（V2 品牌背景，docs/07 色板 #faf6f0） */
-  background-color: #faf6f0;
+  /* V3 系统字体栈：Apple 式标题走最粗档，正文常规（docs/07 §3） */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  /* V3 奶油白页面底色（docs/07 色板 #FBF6EA） */
+  background-color: #FBF6EA;
 }
 </style>

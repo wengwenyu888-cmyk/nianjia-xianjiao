@@ -189,40 +189,57 @@ onMounted(fetchList)
 .page {
   padding: 24px;
 }
+/* 顶栏：毛玻璃白底（Apple 式克制），替代 V2 深蓝渐变 */
 .page-head {
+  position: sticky;
+  top: 12px;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
-  padding: 12px 18px;
-  border-radius: 12px;
-  /* 顶栏深蓝渐变：品牌深蓝 ink → 主色（docs/07 色板 #0e346b → #157fd1） */
-  background: linear-gradient(135deg, #0e346b 0%, #157fd1 100%);
-  color: #ffffff;
+  margin-bottom: 20px;
+  padding: 16px 24px;
+  border: 1px solid rgba(26, 26, 26, 0.06);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
 }
+/* 页面标题：放大加粗（docs/07 §3 大字号层级 24px / 800） */
 .page-head h2 {
   margin: 0;
-  font-size: 20px;
-  color: #ffffff;
-  letter-spacing: 1px;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--nf-ink);
+  letter-spacing: 0.5px;
 }
-/* 品牌字：与页面标题之间用半透明分隔线区分 */
+/* 品牌字：深绿，右侧细分隔线与页面标题区分 */
 .brand-name {
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 3px;
-  margin-right: 12px;
-  padding-right: 12px;
-  border-right: 1px solid rgba(255, 255, 255, 0.35);
+  margin-right: 14px;
+  padding-right: 14px;
+  color: var(--nf-deep);
+  border-right: 1px solid rgba(26, 26, 26, 0.1);
 }
-/* 顶栏内的返回首页链接：浅蓝，hover 变白 */
+/* 顶栏内的返回首页链接：墨色辅助文字，hover 转品牌绿 */
 .page-head a {
-  color: #cfe3f7;
+  color: #6b6b6b;
   text-decoration: none;
   font-size: 14px;
+  transition: color 0.2s;
 }
 .page-head a:hover {
-  color: #ffffff;
+  color: var(--nf-green);
+}
+/* 表格卡片化：白色卡片 + 16px 圆角 + 柔和阴影，去掉默认描边
+ * 直接写死 16px：Element 局部变量与懒加载 CSS 会覆盖 :root 变量，用字面值最稳。 */
+.page :deep(.el-card) {
+  border: none;
+  border-radius: 16px;
+  box-shadow: var(--nf-shadow-card);
+  background: #ffffff;
 }
 .toolbar {
   display: flex;
