@@ -66,6 +66,8 @@ intersection.txt
 recycle_i_records.csv
 s1only.txt
 verify.ps1
+opencode-demo/
+_scout-raw/
 
 .tmp-asar/
 _plugin-audit/
