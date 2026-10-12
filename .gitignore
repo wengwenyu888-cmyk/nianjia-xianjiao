@@ -1,0 +1,19 @@
+# ---- DSH 运行时 / 敏感数据：绝不入库 ----
+.dsh/
+*.local.md
+
+# ---- 大体积、且不应外传：已移除的第三方 skill 备份 ----
+# 这是本地回滚用的安全网（53 个 skill / 48 MB），不是项目内容。
+# 留在磁盘上用于一键还原，但不进版本库，避免仓库膨胀或将第三方内容发布到远端。
+_removed-skills-backup/
+
+# ---- 隐私数据 ----
+*.credentials*
+.env
+.env.*
+
+# ---- 系统与编辑器 ----
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
