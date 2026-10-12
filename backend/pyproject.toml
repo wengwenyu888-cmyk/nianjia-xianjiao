@@ -19,8 +19,11 @@ dependencies = [
     # HTTP 客户端（LLM / 银豹 / 金蝶）
     "httpx>=0.27.2",
     # 认证与口令
+    # bcrypt 必须锁 4.0.x：passlib 1.7.4 与 bcrypt>=4.1 存在兼容冲突
+    # （detect_wrap_bug 触发 "password cannot be longer than 72 bytes" 异常）
     "python-jose[cryptography]>=3.3.0",
     "passlib[bcrypt]>=1.7.4",
+    "bcrypt==4.0.1",
     "python-multipart>=0.0.12",
     # 限流
     "slowapi>=0.1.9",
