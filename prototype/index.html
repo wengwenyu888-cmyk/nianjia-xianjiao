@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>念家鲜饺供应链系统 · 页面原型 v0.1</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;color:#303133;background:linear-gradient(160deg,#fdeceb 0%,#f5f7fa 42%,#eef3f9 100%);min-height:100vh}
+.wrap{max-width:1080px;margin:0 auto;padding:44px 20px 30px}
+.head{text-align:center;margin-bottom:30px}
+.logo{font-size:30px;font-weight:700;color:#c0392b;letter-spacing:4px}
+.title{font-size:17px;color:#606266;margin-top:10px;letter-spacing:1px}
+.meta{margin-top:14px;font-size:13px;color:#909399;line-height:2}
+.meta code{background:#fff;border:1px solid #e4e7ed;border-radius:4px;padding:2px 6px;color:#c0392b;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{display:block;background:#fff;border:1px solid #ebeef5;border-radius:12px;padding:18px 18px 16px;text-decoration:none;color:inherit;box-shadow:0 4px 14px rgba(31,45,61,.06);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(31,45,61,.14);border-color:#f0c8c4;text-decoration:none}
+.card-top{display:flex;align-items:center;justify-content:space-between}
+.num{font-size:22px;font-weight:700;color:#e8b7b2;font-family:Consolas,Monaco,monospace}
+.badge{background:#fef0f0;color:#c0392b;border:1px solid #f5c6c2;font-size:11px;border-radius:10px;padding:1px 8px}
+.card h3{margin:8px 0 6px;font-size:16px;color:#303133}
+.card p{margin:0;font-size:13px;color:#909399;line-height:1.7;min-height:44px}
+.open{display:inline-block;margin-top:12px;font-size:13px;color:#409eff}
+.tip{margin:26px 0 0;text-align:center;font-size:13px;color:#909399}
+.foot{margin-top:26px;padding-top:16px;border-top:1px dashed #dcdfe6;text-align:center;font-size:12px;color:#a8abb2}
+@media (max-width:820px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.grid{grid-template-columns:1fr}.wrap{padding:26px 14px 20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="logo">念家鲜饺</div>
+    <div class="title">念家鲜饺供应链系统 · 页面原型 v0.1</div>
+    <div class="meta">鲜饺直营连锁 · 总部统采统配　|　共 9 个页面，全部为静态 HTML，双击即可在浏览器打开</div>
+  </div>
+  <div class="grid">
+      <a class="card" href="00-login.html">
+        <div class="card-top"><span class="num">00</span></div>
+        <h3>登录页</h3>
+        <p>账号密码登录入口，居中卡片式布局。</p>
+        <span class="open">打开页面 →</span>
+      </a>
+      <a class="card" href="01-stores.html">
+        <div class="card-top"><span class="num">01</span></div>
+        <h3>门店管理</h3>
+        <p>直营门店档案、区域与配送节奏维护。</p>
+        <span class="open">打开页面 →</span>
+      </a>
+      <a class="card" href="02-skus.html">
+        <div class="card-top"><span class="num">02</span></div>
+        <h3>SKU 管理</h3>
+        <p>馅料 / 面皮 / 耗材的规格、订货单位与保质期。</p>
+        <span class="open">打开页面 →</span>
+      </a>
+      <a class="card" href="03-suppliers.html">
+        <div class="card-top"><span class="num">03</span></div>
+        <h3>供应商管理</h3>
+        <p>供应商联系人、账期与启用状态。</p>
+        <span class="open">打开页面 →</span>
+      </a>
+      <a class="card" href="04-prices.html">
+        <div class="card-top"><span class="num">04</span></div>
+        <h3>价目表</h3>
+        <p>采购价与调拨价的生效区间管理。</p>
+        <span class="open">打开页面 →</span>
+      </a>
+      <a class="card" href="05-order-summary.html">
+        <div class="card-top"><span class="num">05</span></div>
+        <h3>要货汇总</h3>
+        <p>按门店汇总当日要货，一键生成分拣单。</p>
+        <span class="open">打开页面 →</span>
+      </a>
+      <a class="card" href="06-store-order.html">
+        <div class="card-top"><span class="num">06</span><span class="badge">重点页</span></div>
+        <h3>门店工作台</h3>
+        <p>今日要货，含 AI 建议数量与临期提醒。</p>
+        <span class="open">打开页面 →</span>
+      </a>
+      <a class="card" href="07-driver-task.html">
+        <div class="card-top"><span class="num">07</span></div>
+        <h3>司机工作台</h3>
+        <p>配送任务、发车与门店签收。</p>
+        <span class="open">打开页面 →</span>
+      </a>
+      <a class="card" href="08-reconcile.html">
+        <div class="card-top"><span class="num">08</span></div>
+        <h3>对账与 KPI</h3>
+        <p>门店对账单与经营指标看板。</p>
+        <span class="open">打开页面 →</span>
+      </a>
+  </div>
+  <div class="tip">建议先看 <code>06 门店工作台</code>（重点页）与 <code>05 要货汇总</code>；页面内左侧菜单或顶部导航可互相跳转。</div>
+  <div class="foot">本页为静态原型，仅用于设计评审，与代码实现可能有差异。</div>
+</div>
+</body>
+</html>

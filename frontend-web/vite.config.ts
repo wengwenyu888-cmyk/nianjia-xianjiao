@@ -40,6 +40,9 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    // 相对路径：桌面壳（Electron file:// 协议）加载构建产物时必须，
+    // 否则绝对路径资源会 404 白屏
+    base: './',
     sourcemap: false,
     chunkSizeWarningLimit: 1500
   }

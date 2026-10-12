@@ -3,7 +3,7 @@
 门店要货到签收对账的闭环系统：门店按「斤」要货 → 总部汇总 → 分拣称重 → 司机配送 →
 门店电子签收 → 门店盈亏对账。
 
-- 技术栈：FastAPI（Python 3.12）+ MySQL 8 + Vue3 / Element Plus + 微信小程序（原生，门店端 + 司机端）
+- 技术栈：FastAPI（Python 3.12）+ MySQL 8 + Vue3 / Element Plus（响应式网页端：总部后台 + 门店端 + 司机端）+ Electron 桌面壳（Windows）
 - 部署定稿：轻量应用服务器 + Docker 起步，数据库用云 RDS MySQL；门店量增长后再迁 TKE
 - 仓库：GitHub 私有仓库；规范以 `docs/05-工程基座方案.md` 为唯一权威
 
@@ -22,8 +22,8 @@ backend/        FastAPI 服务（总部 API，三端共用）
   app/utils/    纯函数（单位换算等）
   alembic/      数据库迁移（只前进不回滚）
   tests/        pytest：unit + api（TestClient）
-frontend-web/   Vue3 + Element Plus 总部后台（Vite + Pinia + vue-router）
-miniapp/        微信小程序：store/（门店端）driver/（司机端）utils/（共享请求封装）
+frontend-web/   响应式网页端：总部后台 + 门店端 + 司机端（Vue3 + Element Plus + Vite + Pinia + vue-router）
+desktop/        Electron 桌面壳：包装 frontend-web 同一份网页（dev 加载 dev server，生产加载 dist 产物；electron-builder 打 Windows 安装包）
 deploy/         Dockerfile、docker-compose.yml、nginx.conf、.env.example
 docs/           业务手册、架构设计、里程碑、工程基座方案
 ```
@@ -37,7 +37,7 @@ docs/           业务手册、架构设计、里程碑、工程基座方案
 
 ### 2.0 前置
 
-Git、Python 3.12、[uv](https://docs.astral.sh/uv/)、Node 20 + pnpm、微信开发者工具、Docker。
+Git、Python 3.12、[uv](https://docs.astral.sh/uv/)、Node 20 + pnpm、Docker。
 
 ### 2.1 环境变量
 
@@ -49,7 +49,7 @@ copy frontend-web\.env.example frontend-web\.env.development
 copy deploy\.env.example deploy\.env
 ```
 
-`.env` 已在 `.gitignore` 中，密钥（数据库密码 / JWT 密钥 / 微信 AppSecret / LLM Key）绝不入库。
+`.env` 已在 `.gitignore` 中，密钥（数据库密码 / JWT 密钥 / LLM Key）绝不入库。
 
 ### 2.2 起 MySQL（本地中间件）
 
@@ -91,13 +91,11 @@ pnpm build                    # 生产构建产物在 dist/
 
 前端通过 `VITE_API_BASE_URL` 找后端；默认 `/api/v1` 走 Vite 代理到 `http://127.0.0.1:8000`。
 
-### 2.5 微信小程序
+### 2.5 桌面壳（Windows，可选）
 
-1. 打开微信开发者工具 → 导入项目 → 目录选 `miniapp/`（`project.config.json` 已就位）。
-2. 门店端与司机端为**分包**：入口页分别为 `store/pages/index/index`、`driver/pages/tasks/tasks`；
-   在「编译模式」下拉框可直接切换（`project.config.json` 已预置 3 个编译条件）。
-3. 开发者工具中勾选「不校验合法域名」，本地直连 `http://127.0.0.1:8000`。
-4. 上线前：把 `miniapp/app.js` 的 `baseUrl` 改为 HTTPS 正式域名，并在微信后台配置 request 合法域名。
+dev：先起 2.4 的 `pnpm dev`，再 `cd desktop && pnpm install && pnpm dev`，桌面窗口即加载 `http://127.0.0.1:5173`。
+
+打包：`cd frontend-web && pnpm build` 生成 `dist/`，再 `cd desktop && pnpm dist`，electron-builder 输出 Windows nsis 安装包到 `desktop/release/`。
 
 ---
 

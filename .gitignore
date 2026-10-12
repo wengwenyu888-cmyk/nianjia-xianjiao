@@ -48,10 +48,6 @@ yarn-error.log*
 Thumbs.db
 desktop.ini
 
-# ---------- 小程序 ----------
-miniapp/**/node_modules/
-project.private.config.json
-
 # ---------- 日志与临时文件 ----------
 *.log
 logs/

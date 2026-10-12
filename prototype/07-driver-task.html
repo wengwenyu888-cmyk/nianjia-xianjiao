@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>司机工作台 · 念家鲜饺供应链系统 · 页面原型 v0.1</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus@2.4.4/dist/index.css" onerror="this.onerror=null;this.href='https://unpkg.com/element-plus@2.4.4/dist/index.css'">
+<style>*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;font-size:14px;line-height:1.6;color:#303133;background:#f5f7fa;-webkit-font-smoothing:antialiased}
+[v-cloak]{display:none}
+h1,h2,h3,p{margin:0}
+a{color:#409eff;text-decoration:none}
+a:hover{text-decoration:underline}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #dcdfe6;padding:8px 10px;text-align:left}
+th{background:#f5f7fa;font-weight:600}
+button{font:inherit}
+.nf-cdn-warn{background:#fdf6ec;color:#b88230;border-bottom:1px solid #f5dab1;padding:8px 16px;font-size:13px}
+.nf-shell{min-height:100vh;display:flex;flex-direction:column}
+.nf-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;height:56px;padding:0 20px;background:#fff;border-bottom:1px solid #e4e7ed;position:sticky;top:0;z-index:1000}
+.nf-brand{display:flex;align-items:baseline;gap:10px;min-width:0}
+.nf-logo{font-size:20px;font-weight:700;color:#c0392b;letter-spacing:2px;white-space:nowrap}
+.nf-sys{font-size:12px;color:#909399;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nf-top-right{display:flex;align-items:center;gap:14px;font-size:13px;color:#606266;white-space:nowrap}
+.nf-body{flex:1;display:flex;align-items:stretch;min-height:0}
+.nf-side{width:220px;flex:0 0 220px;background:#1f2d3d;padding-top:6px}
+.nf-side .el-menu{border-right:none;background:#1f2d3d}
+.nf-main{flex:1;min-width:0;padding:18px 20px 0;background:#f5f7fa}
+.nf-page-head h2{margin:0 0 4px;font-size:20px;font-weight:600;color:#303133}
+.nf-page-head p{margin:0 0 16px;font-size:13px;color:#909399}
+.nf-card{margin-bottom:16px;border-radius:8px}
+.nf-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.nf-toolbar .nf-right{margin-left:auto}
+.nf-pager{display:flex;justify-content:flex-end;margin-top:14px}
+.nf-footer-note{margin:26px 0 0;padding:14px 0 18px;border-top:1px dashed #dcdfe6;font-size:12px;color:#a8abb2;text-align:center}
+.nf-group-head{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.nf-group-title{font-size:15px;font-weight:600;color:#303133}
+.nf-group-sub{font-size:12px;color:#909399}
+.nf-danger-row{background:#fef0f0 !important}
+.nf-danger-row .cell{color:#f56c6c !important;font-weight:600}
+.nf-mobile-nav{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;background:#fff;border-bottom:1px solid #e4e7ed;position:sticky;top:56px;z-index:999}
+.nf-mobile-link{flex:0 0 auto;padding:5px 12px;border-radius:16px;background:#f4f4f5;color:#606266;font-size:13px;white-space:nowrap}
+.nf-mobile-link.active{background:#409eff;color:#fff}
+body.nf-auth{background:linear-gradient(150deg,#fdeceb 0%,#f5f7fa 45%,#eaf1f8 100%)}
+.nf-auth-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.nf-auth-card{width:100%;max-width:400px;background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(31,45,61,.12);padding:32px 28px 24px;text-align:center}
+.nf-auth-logo{font-size:26px;font-weight:700;color:#c0392b;letter-spacing:4px}
+.nf-auth-sub{font-size:12px;color:#909399;margin-top:6px}
+.nf-auth-form{margin-top:24px;text-align:left}
+.nf-auth-actions{margin-top:8px}
+.nf-auth-copy{font-size:12px;color:#a8abb2;margin-top:20px;text-align:center}
+.wb-wrap{max-width:960px;margin:0 auto}
+.wb-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(31,45,61,.05)}
+.wb-store{font-size:19px;font-weight:700;color:#303133;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wb-sub{font-size:12px;color:#909399;margin-top:4px}
+.wb-head-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.wb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.wb-card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 8px rgba(31,45,61,.05);border:1px solid #ebeef5}
+.wb-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.wb-name{font-size:15px;font-weight:600;color:#303133}
+.wb-suggest{display:flex;align-items:center;gap:8px;font-size:13px;color:#606266;flex-wrap:wrap}
+.wb-suggest b{color:#e6a23c;font-size:16px}
+.wb-reason{font-size:12px;color:#909399;margin:6px 0 10px;background:#fafafa;border-radius:6px;padding:6px 8px}
+.wb-field{display:flex;align-items:center;gap:10px;font-size:13px;color:#606266}
+.wb-unit{color:#909399;font-size:12px}
+.wb-meta{display:flex;flex-direction:column;gap:2px;margin-top:10px;font-size:12px;color:#909399;border-top:1px dashed #ebeef5;padding-top:8px}
+.wb-warn{color:#f56c6c;font-weight:600}
+.wb-total{margin:16px 0 12px;background:#fff;border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 8px rgba(31,45,61,.05);font-size:14px}
+.wb-total b{font-size:18px;color:#409eff}
+.wb-total-money{color:#606266}
+.wb-actions{display:flex;justify-content:center;padding-bottom:8px}
+.wb-actions .el-button{width:100%;max-width:360px;height:46px;font-size:16px}
+.wb-driver{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;font-size:13px;color:#606266}
+.wb-route{font-size:12px;color:#909399;margin-top:2px}
+.wb-card-actions{display:flex;gap:8px;margin-top:10px}
+@media (max-width:820px){
+.nf-side{display:none}
+.nf-main{padding:14px 12px 0}
+.nf-topbar{padding:0 12px}
+.nf-sys{display:none}
+.wb-grid{grid-template-columns:1fr}
+.nf-toolbar .nf-right{margin-left:0}
+}
+@media (max-width:480px){
+.nf-user{display:none}
+.wb-total{flex-direction:column;align-items:flex-start}
+}</style>
+</head>
+<body>
+<div id="app" v-cloak>
+  <div class="nf-shell">
+    <header class="nf-topbar">
+      <div class="nf-brand"><span class="nf-logo">念家鲜饺</span><span class="nf-sys">供应链系统 · 页面原型 v0.1</span></div>
+      <div class="nf-top-right">
+        <el-tag type="info" effect="plain" size="small">总部 · 采购部</el-tag>
+        <span class="nf-user">张伟</span>
+        <el-link type="primary" :underline="false" href="index.html">原型导航</el-link>
+      </div>
+    </header>
+<nav class="nf-mobile-nav">
+  <a class="nf-mobile-link" href="index.html">原型首页</a>
+  <a v-for="p in pages" :key="p.file" :href="p.file" class="nf-mobile-link" :class="{ active: p.file === activeMenu }">{{ p.title }}</a>
+</nav>
+    <div class="nf-body">
+
+      <main class="nf-main">
+        <div class="nf-page-head"><h2>司机工作台</h2><p>司机端今日配送任务，按门店卡片流转发车与签收状态。</p></div>
+<div class="wb-wrap">
+  <div class="wb-head">
+    <div>
+      <div class="wb-store">司机 {{ driver }}
+        <el-tag size="small" type="info" effect="plain">{{ plate }}</el-tag>
+      </div>
+      <div class="wb-sub">{{ today }} · 线路：{{ route }}</div>
+    </div>
+    <div class="wb-head-right">
+      <el-tag effect="dark" size="small">今日 {{ tasks.length }} 单</el-tag>
+      <el-tag type="success" effect="dark" size="small">已签收 {{ doneCount }} 单</el-tag>
+    </div>
+  </div>
+
+  <div class="wb-grid">
+    <div class="wb-card" v-for="t in tasks" :key="t.id">
+      <div class="wb-card-top">
+        <span class="wb-name">{{ t.store }}</span>
+        <el-tag size="small" :type="statusTag(t.status)" effect="light">{{ statusText(t.status) }}</el-tag>
+      </div>
+      <div class="wb-route">
+        <el-icon style="vertical-align:-2px"><Location></Location></el-icon> {{ t.address }}
+      </div>
+      <div class="wb-meta">
+        <span>货物件数：<b style="color:#409eff">{{ t.count }}</b> 件</span>
+        <span>任务单号：DL-20261013-{{ t.id }}</span>
+      </div>
+      <div class="wb-card-actions">
+        <el-button v-if="t.status === 'loaded'" type="primary" size="small" @click="depart(t)">
+          <el-icon style="margin-right:4px"><Promotion></Promotion></el-icon>发车
+        </el-button>
+        <el-button v-else-if="t.status === 'on_way'" type="success" size="small" @click="sign(t)">
+          <el-icon style="margin-right:4px"><Check></Check></el-icon>签收
+        </el-button>
+        <el-button v-else type="info" size="small" disabled>已完成</el-button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wb-total">
+    <div>今日合计：<b>{{ totalCount }}</b> 件　|　{{ tasks.length }} 个配送点</div>
+    <div class="wb-total-money">签收进度 {{ doneCount }} / {{ tasks.length }}</div>
+  </div>
+</div>
+<div class="nf-footer-note">本页为静态原型，仅用于设计评审，与代码实现可能有差异。</div>
+      </main>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.prod.js" onerror="this.onerror=null;this.src='https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js'"></script>
+<script src="https://cdn.jsdelivr.net/npm/element-plus@2.4.4/dist/index.full.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/element-plus@2.4.4/dist/index.full.min.js'"></script>
+<script src="https://cdn.jsdelivr.net/npm/element-plus@2.4.4/dist/locale/zh-cn.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/element-plus@2.4.4/dist/locale/zh-cn.min.js'"></script>
+<script src="https://cdn.jsdelivr.net/npm/@element-plus/icons-vue@2.3.1/dist/index.iife.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/@element-plus/icons-vue@2.3.1/dist/index.iife.min.js'"></script>
+<script>
+(function () {
+  var PAGES = [{"title":"登录页","file":"00-login.html","icon":"User"},{"title":"门店管理","file":"01-stores.html","icon":"Shop"},{"title":"SKU 管理","file":"02-skus.html","icon":"Goods"},{"title":"供应商管理","file":"03-suppliers.html","icon":"OfficeBuilding"},{"title":"价目表","file":"04-prices.html","icon":"PriceTag"},{"title":"要货汇总","file":"05-order-summary.html","icon":"Tickets"},{"title":"门店工作台","file":"06-store-order.html","icon":"Cellphone"},{"title":"司机工作台","file":"07-driver-task.html","icon":"Van"},{"title":"对账与 KPI","file":"08-reconcile.html","icon":"DataAnalysis"}];
+  var ACTIVE = "07-driver-task.html";
+  var BOOT_STARTED = false;
+  function showFallback() {
+    var el = document.getElementById("app");
+    if (el) { el.removeAttribute("v-cloak"); }
+    if (!document.querySelector(".nf-cdn-warn")) {
+      var tip = document.createElement("div");
+      tip.className = "nf-cdn-warn";
+      tip.textContent = "CDN 资源（Vue / Element Plus）加载失败：已按基础样式展示，请检查网络后刷新页面。";
+      document.body.insertBefore(tip, document.body.firstChild);
+    }
+  }
+  function mountApp() {
+    var PAGE = {
+      data: function () {
+        return {
+          driver: "王强",
+          plate: "鲁 G·8T216",
+          route: "潍坊城区 A 线",
+          today: "2026-10-13 星期二",
+          tasks: [
+            { id: 101, store: "潍坊001店（东风街店）", address: "潍坊市奎文区东风东街 168 号", count: 14, status: "loaded" },
+            { id: 102, store: "潍坊002店（金马路店）", address: "潍坊市高新区金马路 66 号", count: 9, status: "loaded" },
+            { id: 103, store: "潍坊003店（虞河路店）", address: "潍坊市奎文区虞河路 233 号", count: 7, status: "on_way" },
+            { id: 104, store: "潍坊004店（胜利街店）", address: "潍坊市潍城区胜利西街 88 号", count: 11, status: "signed" }
+          ]
+        };
+      },
+      computed: {
+        totalCount: function () {
+          var n = 0;
+          for (var i = 0; i < this.tasks.length; i++) { n += this.tasks[i].count; }
+          return n;
+        },
+        doneCount: function () {
+          var n = 0;
+          for (var i = 0; i < this.tasks.length; i++) { if (this.tasks[i].status === "signed") { n += 1; } }
+          return n;
+        }
+      },
+      methods: {
+        statusText: function (s) {
+          if (s === "loaded") { return "已装车"; }
+          if (s === "on_way") { return "配送中"; }
+          return "已签收";
+        },
+        statusTag: function (s) {
+          if (s === "loaded") { return "info"; }
+          if (s === "on_way") { return "warning"; }
+          return "success";
+        },
+        depart: function (t) {
+          t.status = "on_way";
+          this.$message.success("已发车前往 " + t.store);
+        },
+        sign: function (t) {
+          t.status = "signed";
+          this.$message.success(t.store + " 签收完成（" + t.count + " 件）");
+        }
+      }
+    };
+    var pageData = PAGE.data || function () { return {}; };
+    var methods = Object.assign({
+      go: function (f) { window.location.href = f; },
+      deliveryText: function (v) { return v === "daily" ? "每日配送" : "隔日配送"; },
+      deliveryTag: function (v) { return v === "daily" ? "success" : "warning"; }
+    }, PAGE.methods || {});
+    var opts = {
+      data: function () {
+        var d = pageData.call(this) || {};
+        d.activeMenu = ACTIVE;
+        d.pages = PAGES;
+        return d;
+      },
+      methods: methods,
+      computed: PAGE.computed || {}
+    };
+    if (PAGE.mounted) { opts.mounted = PAGE.mounted; }
+    var app = Vue.createApp(opts);
+    app.use(ElementPlus, { locale: window.ElementPlusLocaleZhCn || undefined });
+    if (window.ElementPlusIconsVue) {
+      for (var k in window.ElementPlusIconsVue) { app.component(k, window.ElementPlusIconsVue[k]); }
+    }
+    app.mount("#app");
+  }
+  function boot() {
+    if (BOOT_STARTED) { return; }
+    BOOT_STARTED = true;
+    if (window.Vue && window.ElementPlus) {
+      try { mountApp(); } catch (e) { console.error(e); showFallback(); }
+      return;
+    }
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries += 1;
+      if (window.Vue && window.ElementPlus) {
+        clearInterval(timer);
+        try { mountApp(); } catch (e) { console.error(e); showFallback(); }
+        return;
+      }
+      if (tries >= 25) { clearInterval(timer); showFallback(); }
+    }, 150);
+  }
+  boot();
+})();
+</script>
+</body>
+</html>

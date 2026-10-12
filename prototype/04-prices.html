@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>价目表 · 念家鲜饺供应链系统 · 页面原型 v0.1</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus@2.4.4/dist/index.css" onerror="this.onerror=null;this.href='https://unpkg.com/element-plus@2.4.4/dist/index.css'">
+<style>*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;font-size:14px;line-height:1.6;color:#303133;background:#f5f7fa;-webkit-font-smoothing:antialiased}
+[v-cloak]{display:none}
+h1,h2,h3,p{margin:0}
+a{color:#409eff;text-decoration:none}
+a:hover{text-decoration:underline}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #dcdfe6;padding:8px 10px;text-align:left}
+th{background:#f5f7fa;font-weight:600}
+button{font:inherit}
+.nf-cdn-warn{background:#fdf6ec;color:#b88230;border-bottom:1px solid #f5dab1;padding:8px 16px;font-size:13px}
+.nf-shell{min-height:100vh;display:flex;flex-direction:column}
+.nf-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;height:56px;padding:0 20px;background:#fff;border-bottom:1px solid #e4e7ed;position:sticky;top:0;z-index:1000}
+.nf-brand{display:flex;align-items:baseline;gap:10px;min-width:0}
+.nf-logo{font-size:20px;font-weight:700;color:#c0392b;letter-spacing:2px;white-space:nowrap}
+.nf-sys{font-size:12px;color:#909399;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nf-top-right{display:flex;align-items:center;gap:14px;font-size:13px;color:#606266;white-space:nowrap}
+.nf-body{flex:1;display:flex;align-items:stretch;min-height:0}
+.nf-side{width:220px;flex:0 0 220px;background:#1f2d3d;padding-top:6px}
+.nf-side .el-menu{border-right:none;background:#1f2d3d}
+.nf-main{flex:1;min-width:0;padding:18px 20px 0;background:#f5f7fa}
+.nf-page-head h2{margin:0 0 4px;font-size:20px;font-weight:600;color:#303133}
+.nf-page-head p{margin:0 0 16px;font-size:13px;color:#909399}
+.nf-card{margin-bottom:16px;border-radius:8px}
+.nf-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.nf-toolbar .nf-right{margin-left:auto}
+.nf-pager{display:flex;justify-content:flex-end;margin-top:14px}
+.nf-footer-note{margin:26px 0 0;padding:14px 0 18px;border-top:1px dashed #dcdfe6;font-size:12px;color:#a8abb2;text-align:center}
+.nf-group-head{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.nf-group-title{font-size:15px;font-weight:600;color:#303133}
+.nf-group-sub{font-size:12px;color:#909399}
+.nf-danger-row{background:#fef0f0 !important}
+.nf-danger-row .cell{color:#f56c6c !important;font-weight:600}
+.nf-mobile-nav{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;background:#fff;border-bottom:1px solid #e4e7ed;position:sticky;top:56px;z-index:999}
+.nf-mobile-link{flex:0 0 auto;padding:5px 12px;border-radius:16px;background:#f4f4f5;color:#606266;font-size:13px;white-space:nowrap}
+.nf-mobile-link.active{background:#409eff;color:#fff}
+body.nf-auth{background:linear-gradient(150deg,#fdeceb 0%,#f5f7fa 45%,#eaf1f8 100%)}
+.nf-auth-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.nf-auth-card{width:100%;max-width:400px;background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(31,45,61,.12);padding:32px 28px 24px;text-align:center}
+.nf-auth-logo{font-size:26px;font-weight:700;color:#c0392b;letter-spacing:4px}
+.nf-auth-sub{font-size:12px;color:#909399;margin-top:6px}
+.nf-auth-form{margin-top:24px;text-align:left}
+.nf-auth-actions{margin-top:8px}
+.nf-auth-copy{font-size:12px;color:#a8abb2;margin-top:20px;text-align:center}
+.wb-wrap{max-width:960px;margin:0 auto}
+.wb-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(31,45,61,.05)}
+.wb-store{font-size:19px;font-weight:700;color:#303133;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wb-sub{font-size:12px;color:#909399;margin-top:4px}
+.wb-head-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.wb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.wb-card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 8px rgba(31,45,61,.05);border:1px solid #ebeef5}
+.wb-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.wb-name{font-size:15px;font-weight:600;color:#303133}
+.wb-suggest{display:flex;align-items:center;gap:8px;font-size:13px;color:#606266;flex-wrap:wrap}
+.wb-suggest b{color:#e6a23c;font-size:16px}
+.wb-reason{font-size:12px;color:#909399;margin:6px 0 10px;background:#fafafa;border-radius:6px;padding:6px 8px}
+.wb-field{display:flex;align-items:center;gap:10px;font-size:13px;color:#606266}
+.wb-unit{color:#909399;font-size:12px}
+.wb-meta{display:flex;flex-direction:column;gap:2px;margin-top:10px;font-size:12px;color:#909399;border-top:1px dashed #ebeef5;padding-top:8px}
+.wb-warn{color:#f56c6c;font-weight:600}
+.wb-total{margin:16px 0 12px;background:#fff;border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 8px rgba(31,45,61,.05);font-size:14px}
+.wb-total b{font-size:18px;color:#409eff}
+.wb-total-money{color:#606266}
+.wb-actions{display:flex;justify-content:center;padding-bottom:8px}
+.wb-actions .el-button{width:100%;max-width:360px;height:46px;font-size:16px}
+.wb-driver{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;font-size:13px;color:#606266}
+.wb-route{font-size:12px;color:#909399;margin-top:2px}
+.wb-card-actions{display:flex;gap:8px;margin-top:10px}
+@media (max-width:820px){
+.nf-side{display:none}
+.nf-main{padding:14px 12px 0}
+.nf-topbar{padding:0 12px}
+.nf-sys{display:none}
+.wb-grid{grid-template-columns:1fr}
+.nf-toolbar .nf-right{margin-left:0}
+}
+@media (max-width:480px){
+.nf-user{display:none}
+.wb-total{flex-direction:column;align-items:flex-start}
+}</style>
+</head>
+<body>
+<div id="app" v-cloak>
+  <div class="nf-shell">
+    <header class="nf-topbar">
+      <div class="nf-brand"><span class="nf-logo">念家鲜饺</span><span class="nf-sys">供应链系统 · 页面原型 v0.1</span></div>
+      <div class="nf-top-right">
+        <el-tag type="info" effect="plain" size="small">总部 · 采购部</el-tag>
+        <span class="nf-user">张伟</span>
+        <el-link type="primary" :underline="false" href="index.html">原型导航</el-link>
+      </div>
+    </header>
+
+    <div class="nf-body">
+<aside class="nf-side">
+  <el-menu :default-active="activeMenu" background-color="#1f2d3d" text-color="#bfcbd9" active-text-color="#ffd04b" @select="go">
+    <el-menu-item index="index.html"><el-icon><HomeFilled></HomeFilled></el-icon><span>原型首页</span></el-menu-item>
+    <el-menu-item v-for="p in pages" :key="p.file" :index="p.file">
+      <el-icon><component :is="p.icon"></component></el-icon>
+      <span>{{ p.title }}</span>
+    </el-menu-item>
+  </el-menu>
+</aside>
+      <main class="nf-main">
+        <div class="nf-page-head"><h2>价目表</h2><p>按 SKU 维护采购价与调拨价，含生效开始 / 结束日期，支持按 SKU 与日期区间筛选。</p></div>
+<el-card shadow="never" class="nf-card">
+  <div class="nf-toolbar">
+    <el-select v-model="skuFilter" placeholder="全部 SKU" clearable filterable style="width:220px">
+      <el-option v-for="s in skuOptions" :key="s.code" :label="s.name + '（' + s.code + '）'" :value="s.code"></el-option>
+    </el-select>
+    <el-date-picker v-model="dateRange" type="daterange" value-format="YYYY-MM-DD" range-separator="至" start-placeholder="生效开始" end-placeholder="生效结束" style="width:280px"></el-date-picker>
+    <el-button type="primary" @click="doQuery">
+      <el-icon style="margin-right:4px"><Search></Search></el-icon>查询
+    </el-button>
+    <el-button @click="resetQuery">重置</el-button>
+    <div class="nf-right">
+      <el-button type="primary" plain @click="openCreate">
+        <el-icon style="margin-right:4px"><Plus></Plus></el-icon>新增价目
+      </el-button>
+    </div>
+  </div>
+  <el-table :data="filteredPrices" border stripe style="width:100%">
+    <el-table-column label="SKU" min-width="200">
+      <template #default="scope">
+        <span>{{ scope.row.skuName }}</span>
+        <span style="color:#909399;font-size:12px">（{{ scope.row.skuCode }}）</span>
+      </template>
+    </el-table-column>
+    <el-table-column label="类型" width="110">
+      <template #default="scope">
+        <el-tag :type="scope.row.type === 'purchase' ? 'warning' : 'success'" size="small">{{ scope.row.type === 'purchase' ? '采购价' : '调拨价' }}</el-tag>
+      </template>
+    </el-table-column>
+    <el-table-column label="单价" width="120">
+      <template #default="scope">
+        <span style="color:#c0392b;font-weight:600">¥{{ Number(scope.row.price).toFixed(2) }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column prop="start" label="生效开始" width="140"></el-table-column>
+    <el-table-column prop="end" label="生效结束" width="140"></el-table-column>
+    <el-table-column label="操作" width="120" fixed="right">
+      <template #default="scope">
+        <el-link type="primary" :underline="false" @click="edit(scope.row)" style="margin-right:12px">编辑</el-link>
+        <el-link type="danger" :underline="false" @click="expire(scope.row)">失效</el-link>
+      </template>
+    </el-table-column>
+  </el-table>
+</el-card>
+
+<el-dialog v-model="dialogVisible" :title="dialogTitle" width="520px">
+  <el-form :model="form" label-width="100px">
+    <el-form-item label="SKU">
+      <el-select v-model="form.skuCode" filterable style="width:100%">
+        <el-option v-for="s in skuOptions" :key="s.code" :label="s.name + '（' + s.code + '）'" :value="s.code"></el-option>
+      </el-select>
+    </el-form-item>
+    <el-form-item label="类型">
+      <el-radio-group v-model="form.type">
+        <el-radio label="purchase">采购价</el-radio>
+        <el-radio label="transfer">调拨价</el-radio>
+      </el-radio-group>
+    </el-form-item>
+    <el-form-item label="单价(元)"><el-input-number v-model="form.price" :min="0" :precision="2" :step="1"></el-input-number></el-form-item>
+    <el-form-item label="生效期间">
+      <el-date-picker v-model="form.range" type="daterange" value-format="YYYY-MM-DD" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" style="width:100%"></el-date-picker>
+    </el-form-item>
+  </el-form>
+  <template #footer>
+    <el-button @click="dialogVisible = false">取消</el-button>
+    <el-button type="primary" @click="save">保存</el-button>
+  </template>
+</el-dialog>
+<div class="nf-footer-note">本页为静态原型，仅用于设计评审，与代码实现可能有差异。</div>
+      </main>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.prod.js" onerror="this.onerror=null;this.src='https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js'"></script>
+<script src="https://cdn.jsdelivr.net/npm/element-plus@2.4.4/dist/index.full.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/element-plus@2.4.4/dist/index.full.min.js'"></script>
+<script src="https://cdn.jsdelivr.net/npm/element-plus@2.4.4/dist/locale/zh-cn.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/element-plus@2.4.4/dist/locale/zh-cn.min.js'"></script>
+<script src="https://cdn.jsdelivr.net/npm/@element-plus/icons-vue@2.3.1/dist/index.iife.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/@element-plus/icons-vue@2.3.1/dist/index.iife.min.js'"></script>
+<script>
+(function () {
+  var PAGES = [{"title":"登录页","file":"00-login.html","icon":"User"},{"title":"门店管理","file":"01-stores.html","icon":"Shop"},{"title":"SKU 管理","file":"02-skus.html","icon":"Goods"},{"title":"供应商管理","file":"03-suppliers.html","icon":"OfficeBuilding"},{"title":"价目表","file":"04-prices.html","icon":"PriceTag"},{"title":"要货汇总","file":"05-order-summary.html","icon":"Tickets"},{"title":"门店工作台","file":"06-store-order.html","icon":"Cellphone"},{"title":"司机工作台","file":"07-driver-task.html","icon":"Van"},{"title":"对账与 KPI","file":"08-reconcile.html","icon":"DataAnalysis"}];
+  var ACTIVE = "04-prices.html";
+  var BOOT_STARTED = false;
+  function showFallback() {
+    var el = document.getElementById("app");
+    if (el) { el.removeAttribute("v-cloak"); }
+    if (!document.querySelector(".nf-cdn-warn")) {
+      var tip = document.createElement("div");
+      tip.className = "nf-cdn-warn";
+      tip.textContent = "CDN 资源（Vue / Element Plus）加载失败：已按基础样式展示，请检查网络后刷新页面。";
+      document.body.insertBefore(tip, document.body.firstChild);
+    }
+  }
+  function mountApp() {
+    var PAGE = {
+      data: function () {
+        return {
+          skuFilter: "",
+          dateRange: [],
+          appliedSku: "",
+          appliedRange: [],
+          dialogVisible: false,
+          dialogTitle: "新增价目",
+          skuOptions: [
+            { code: "SKU-1001", name: "虾仁三鲜馅" },
+            { code: "SKU-1002", name: "白菜鲜肉馅" },
+            { code: "SKU-1003", name: "韭菜鸡蛋馅" },
+            { code: "SKU-1004", name: "荠菜鲜肉馅" },
+            { code: "SKU-1005", name: "酸菜猪肉馅" },
+            { code: "SKU-2001", name: "精制饺子皮" },
+            { code: "SKU-2002", name: "全麦饺子皮" },
+            { code: "SKU-3001", name: "饺子醋（陈酿）" }
+          ],
+          form: { id: "", skuCode: "SKU-1001", type: "purchase", price: 0, range: [] },
+          nextId: 100,
+          prices: [
+            { id: 1, skuCode: "SKU-1001", skuName: "虾仁三鲜馅", type: "purchase", price: 68.00, start: "2026-09-01", end: "2026-10-31" },
+            { id: 2, skuCode: "SKU-1001", skuName: "虾仁三鲜馅", type: "transfer", price: 82.00, start: "2026-09-01", end: "2026-10-31" },
+            { id: 3, skuCode: "SKU-1002", skuName: "白菜鲜肉馅", type: "purchase", price: 32.50, start: "2026-09-15", end: "2026-10-31" },
+            { id: 4, skuCode: "SKU-1002", skuName: "白菜鲜肉馅", type: "transfer", price: 42.00, start: "2026-09-15", end: "2026-10-31" },
+            { id: 5, skuCode: "SKU-1003", skuName: "韭菜鸡蛋馅", type: "purchase", price: 28.00, start: "2026-10-01", end: "2026-10-31" },
+            { id: 6, skuCode: "SKU-2001", skuName: "精制饺子皮", type: "purchase", price: 21.00, start: "2026-10-01", end: "2026-12-31" },
+            { id: 7, skuCode: "SKU-2001", skuName: "精制饺子皮", type: "transfer", price: 28.00, start: "2026-10-01", end: "2026-12-31" },
+            { id: 8, skuCode: "SKU-3001", skuName: "饺子醋（陈酿）", type: "purchase", price: 96.00, start: "2026-08-01", end: "2026-10-15" },
+            { id: 9, skuCode: "SKU-3001", skuName: "饺子醋（陈酿）", type: "transfer", price: 120.00, start: "2026-08-01", end: "2026-10-15" }
+          ]
+        };
+      },
+      computed: {
+        filteredPrices: function () {
+          var sku = this.appliedSku;
+          var r = this.appliedRange;
+          return this.prices.filter(function (p) {
+            var okSku = !sku || p.skuCode === sku;
+            var okDate = !r || r.length !== 2 || (p.start <= r[1] && p.end >= r[0]);
+            return okSku && okDate;
+          });
+        }
+      },
+      methods: {
+        doQuery: function () {
+          this.appliedSku = this.skuFilter;
+          this.appliedRange = this.dateRange ? this.dateRange.slice() : [];
+          this.$message.success("已按筛选条件查询，共 " + this.filteredPrices.length + " 条价目");
+        },
+        resetQuery: function () {
+          this.skuFilter = "";
+          this.dateRange = [];
+          this.appliedSku = "";
+          this.appliedRange = [];
+        },
+        openCreate: function () {
+          this.dialogTitle = "新增价目";
+          this.form = { id: "", skuCode: "SKU-1001", type: "purchase", price: 0, range: ["2026-10-15", "2026-12-31"] };
+          this.dialogVisible = true;
+        },
+        edit: function (row) {
+          this.dialogTitle = "编辑价目 · " + row.skuName;
+          this.form = { id: row.id, skuCode: row.skuCode, type: row.type, price: row.price, range: [row.start, row.end] };
+          this.dialogVisible = true;
+        },
+        expire: function (row) {
+          row.end = "2026-10-12";
+          this.$message.warning(row.skuName + " 的价目已于今日失效");
+        },
+        save: function () {
+          if (!this.form.range || this.form.range.length !== 2) { this.$message.warning("请选择生效期间"); return; }
+          var name = "";
+          for (var i = 0; i < this.skuOptions.length; i++) { if (this.skuOptions[i].code === this.form.skuCode) { name = this.skuOptions[i].name; } }
+          var row = {
+            id: this.form.id || (this.nextId++),
+            skuCode: this.form.skuCode,
+            skuName: name,
+            type: this.form.type,
+            price: this.form.price,
+            start: this.form.range[0],
+            end: this.form.range[1]
+          };
+          var idx = -1;
+          for (var j = 0; j < this.prices.length; j++) { if (this.prices[j].id === row.id) { idx = j; break; } }
+          if (idx >= 0) { this.prices.splice(idx, 1, row); this.$message.success("价目已更新"); }
+          else { this.prices.push(row); this.$message.success("价目已新增"); }
+          this.dialogVisible = false;
+        }
+      }
+    };
+    var pageData = PAGE.data || function () { return {}; };
+    var methods = Object.assign({
+      go: function (f) { window.location.href = f; },
+      deliveryText: function (v) { return v === "daily" ? "每日配送" : "隔日配送"; },
+      deliveryTag: function (v) { return v === "daily" ? "success" : "warning"; }
+    }, PAGE.methods || {});
+    var opts = {
+      data: function () {
+        var d = pageData.call(this) || {};
+        d.activeMenu = ACTIVE;
+        d.pages = PAGES;
+        return d;
+      },
+      methods: methods,
+      computed: PAGE.computed || {}
+    };
+    if (PAGE.mounted) { opts.mounted = PAGE.mounted; }
+    var app = Vue.createApp(opts);
+    app.use(ElementPlus, { locale: window.ElementPlusLocaleZhCn || undefined });
+    if (window.ElementPlusIconsVue) {
+      for (var k in window.ElementPlusIconsVue) { app.component(k, window.ElementPlusIconsVue[k]); }
+    }
+    app.mount("#app");
+  }
+  function boot() {
+    if (BOOT_STARTED) { return; }
+    BOOT_STARTED = true;
+    if (window.Vue && window.ElementPlus) {
+      try { mountApp(); } catch (e) { console.error(e); showFallback(); }
+      return;
+    }
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries += 1;
+      if (window.Vue && window.ElementPlus) {
+        clearInterval(timer);
+        try { mountApp(); } catch (e) { console.error(e); showFallback(); }
+        return;
+      }
+      if (tries >= 25) { clearInterval(timer); showFallback(); }
+    }, 150);
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
