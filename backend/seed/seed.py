@@ -154,6 +154,9 @@ _STORE_MANAGER_CODES = [
     "sign:create",
     "sign:read",
     "loss:create",
+    # 店长签收前需查看配送单详情（§8.2 POST /deliveries/{id}/sign 的角色含 store_manager），
+    # 缺该权限会导致店长能签收却打不开明细 → 签收功能不可用（已由冒烟测试发现并修复）
+    "delivery:read",
 ]
 
 # driver：配送签收类（§8.3「默认角色」列）
