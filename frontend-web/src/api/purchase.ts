@@ -25,6 +25,8 @@ export interface PurchaseOrderItem {
   unit: string
   /** 基础单位数量（服务层按 convert_factor 换算，只读） */
   qty_base: number
+  /** 已收数量（基础单位，分批收货用；本次可收量 = qty_base − received_qty_base） */
+  received_qty_base: number
   /** 下单单价（元/展示单位） */
   unit_price: number
   /** 行金额 = qty_unit × unit_price */

@@ -312,7 +312,7 @@ interface ReceiveRow {
   unit: string
   /** 采购单订货量（只读展示） */
   qty_unit: number
-  /** 采购单全量（基础单位），用于「全量」复位 */
+  /** 本次可收量（基础单位）= 订购量 − 已收量；用于「全量」复位与默认值 */
   full_base: number
   /** 本次收货数量（基础单位） */
   qty_base: number
@@ -343,22 +343,24 @@ function openReceive(row: PurchaseOrder): void {
   receiveForm.batch_no_prefix = ''
   receiveForm.expire_at = ''
   receiveForm.rows = (row.items ?? []).map((it) => {
-    const full = Number(it.qty_base)
+    // 本次可收量 = 订购量 − 已收量：分批收货时若按整单量预填，第二次收货会把整单量重复入账
+    const receivable = Number(it.qty_base) - Number(it.received_qty_base ?? 0)
+    const safe = Number.isFinite(receivable) && receivable > 0 ? receivable : 0
     return {
       sku_id: it.sku_id,
       sku_no: it.sku_no ?? null,
       sku_name: it.sku_name ?? null,
       unit: it.unit,
       qty_unit: Number(it.qty_unit),
-      full_base: Number.isFinite(full) ? full : 0,
-      qty_base: Number.isFinite(full) ? full : 0,
+      full_base: safe,
+      qty_base: safe,
       unit_price: Number(it.unit_price)
     }
   })
   receiveVisible.value = true
 }
 
-/** 复位为采购单全量 */
+/** 复位为「本次可收量」（订购量 − 已收量） */
 function resetReceiveRow(index: number): void {
   const row = receiveForm.rows[index]
   if (row) row.qty_base = row.full_base
