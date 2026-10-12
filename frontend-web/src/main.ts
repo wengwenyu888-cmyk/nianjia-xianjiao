@@ -8,6 +8,8 @@ import App from '@/App.vue'
 import router from '@/router'
 
 import 'element-plus/dist/index.css'
+// V2 品牌主题：覆盖 Element Plus CSS 变量（色板依据 docs/07-品牌与设计规范.md）
+import '@/styles/theme.css'
 
 const app = createApp(App)
 

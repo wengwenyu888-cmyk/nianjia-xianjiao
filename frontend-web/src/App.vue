@@ -16,6 +16,7 @@ body,
   margin: 0;
   padding: 0;
   font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-  background-color: #f5f7fa;
+  /* 暖米底：家的温度（V2 品牌背景，docs/07 色板 #faf6f0） */
+  background-color: #faf6f0;
 }
 </style>

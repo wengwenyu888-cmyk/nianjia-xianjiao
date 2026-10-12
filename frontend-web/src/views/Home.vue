@@ -68,10 +68,17 @@ onMounted(async () => {
 
 <template>
   <div class="home">
+    <!-- 品牌 banner：深蓝渐变底 + slogan「吃鲜饺，想念家」+ 品牌承诺三连 -->
     <el-card shadow="never" class="banner">
       <div class="banner-head">
-        <div>
-          <h1>念家鲜饺供应链</h1>
+        <div class="banner-brand">
+          <p class="brand-line">念家鲜饺 · 供应链系统</p>
+          <h1>吃鲜饺，想念家</h1>
+          <div class="promise-row">
+            <span class="promise">馅不隔夜</span>
+            <span class="promise">现包现煮</span>
+            <span class="promise">伙伴幸福顾客幸福</span>
+          </div>
           <p class="subtitle">门店要货 → 总部汇总 → 分拣 → 配送 → 签收 → 对账 一体化后台</p>
         </div>
         <div class="user-box">
@@ -81,12 +88,15 @@ onMounted(async () => {
               v-for="code in userStore.roleCodes"
               :key="code"
               size="small"
-              type="danger"
-              effect="light"
+              type="info"
+              effect="plain"
+              class="role-tag"
             >
               {{ roleText(code) }}
             </el-tag>
-            <el-button link type="primary" @click="handleLogout">退出登录</el-button>
+            <el-button link type="primary" class="logout-btn" @click="handleLogout">
+              退出登录
+            </el-button>
           </template>
           <router-link v-else to="/login" class="login-link">去登录</router-link>
         </div>
@@ -99,6 +109,7 @@ onMounted(async () => {
       </div>
     </el-card>
 
+    <!-- 主数据导航：12px 圆角白卡片，hover 主色描边 -->
     <el-card shadow="never" class="nav">
       <span class="nav-label">主数据：</span>
       <router-link v-for="nav in masterNavs" :key="nav.to" :to="nav.to" class="nav-link">
@@ -124,7 +135,7 @@ onMounted(async () => {
 
     <el-row :gutter="16" class="grid">
       <el-col v-for="item in links" :key="item.title" :xs="24" :sm="12" :md="6">
-        <el-card shadow="hover">
+        <el-card shadow="hover" class="feature-card">
           <h3>{{ item.title }}</h3>
           <p class="muted">{{ item.desc }}</p>
         </el-card>
@@ -137,9 +148,14 @@ onMounted(async () => {
 .home {
   padding: 24px;
 }
-.banner h1 {
-  margin: 0 0 8px;
-  font-size: 24px;
+
+/* ---- 品牌 banner：深蓝 ink → 天蓝 对角渐变 ---- */
+.banner {
+  --el-card-bg-color: transparent;
+  background: linear-gradient(135deg, #0e346b 0%, #0f92d2 100%);
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
 }
 .banner-head {
   display: flex;
@@ -148,54 +164,117 @@ onMounted(async () => {
   gap: 16px;
   flex-wrap: wrap;
 }
+.brand-line {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.82);
+}
+.banner h1 {
+  margin: 8px 0 12px;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #ffffff;
+}
+.promise-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+/* 品牌承诺三连：白描边小标签 */
+.promise {
+  font-size: 12px;
+  line-height: 1;
+  padding: 5px 12px;
+  border-radius: 999px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+}
 .user-box {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
   font-size: 14px;
+  /* 深色 banner 上的链接按钮配色：通过 Element 变量继承，不改业务逻辑 */
+  --el-button-text-color: #d8ecff;
+  --el-button-hover-text-color: #ffffff;
+  --el-button-hover-link-text-color: #ffffff;
 }
 .user-name {
   font-weight: 600;
-  color: #303133;
+  color: #ffffff;
+}
+/* 角色标签：深蓝底上的半透明白标签 */
+.role-tag {
+  --el-tag-bg-color: rgba(255, 255, 255, 0.16);
+  --el-tag-border-color: rgba(255, 255, 255, 0.4);
+  --el-tag-text-color: #ffffff;
 }
 .login-link {
-  color: #409eff;
+  color: #d8ecff;
   text-decoration: none;
 }
+.login-link:hover {
+  color: #ffffff;
+}
 .subtitle {
-  color: #606266;
-  margin: 0 0 16px;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0;
+  font-size: 13px;
 }
 .status {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-top: 16px;
 }
+/* 辅助文字：蓝灰；banner 内另用半透明白 */
 .muted {
-  color: #909399;
+  color: #707c9d;
   font-size: 13px;
 }
+.status .muted {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ---- 主数据导航卡片 ---- */
 .nav {
   margin-top: 16px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
 }
 .nav-label {
-  color: #606266;
+  color: #0e346b;
   font-size: 14px;
+  font-weight: 600;
 }
 .nav-link {
-  color: #409eff;
+  color: #0e346b;
   text-decoration: none;
+  padding: 8px 18px;
+  border: 1px solid #d0e5f6;
+  border-radius: 12px;
+  background: #ffffff;
+  transition: color 0.2s, border-color 0.2s, background-color 0.2s;
 }
 .nav-link:hover {
-  text-decoration: underline;
+  color: #157fd1;
+  border-color: #157fd1;
+  background: #e8f2fa;
+  text-decoration: none;
 }
+
+/* ---- 下载卡片 ---- */
 .download {
   margin-top: 16px;
+  border-radius: 12px;
 }
 .download-head {
   display: flex;
@@ -207,6 +286,7 @@ onMounted(async () => {
 .download-head h3 {
   margin: 0;
   font-size: 16px;
+  color: #0e346b;
 }
 .download-link {
   text-decoration: none;
@@ -214,11 +294,22 @@ onMounted(async () => {
 .download p {
   margin: 8px 0 0;
 }
+
+/* ---- 业务入口卡片：12px 圆角 + hover 主色描边 ---- */
 .grid {
   margin-top: 16px;
+}
+.grid :deep(.el-card) {
+  border-radius: 12px;
+  height: 100%;
+  transition: border-color 0.2s;
+}
+.grid :deep(.el-card:hover) {
+  border-color: #157fd1;
 }
 .grid h3 {
   margin: 0 0 8px;
   font-size: 16px;
+  color: #0e346b;
 }
 </style>

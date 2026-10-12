@@ -153,7 +153,7 @@ onMounted(fetchList)
 <template>
   <div class="page">
     <div class="page-head">
-      <h2>门店管理</h2>
+      <h2><span class="brand-name">念家鲜饺</span>门店管理</h2>
       <router-link to="/">← 返回首页</router-link>
     </div>
 
@@ -270,13 +270,38 @@ onMounted(fetchList)
 }
 .page-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 12px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  /* 顶栏深蓝渐变：品牌深蓝 ink → 主色（docs/07 色板 #0e346b → #157fd1） */
+  background: linear-gradient(135deg, #0e346b 0%, #157fd1 100%);
+  color: #ffffff;
 }
 .page-head h2 {
   margin: 0;
   font-size: 20px;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+/* 品牌字：与页面标题之间用半透明分隔线区分 */
+.brand-name {
+  font-weight: 700;
+  letter-spacing: 3px;
+  margin-right: 12px;
+  padding-right: 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.35);
+}
+/* 顶栏内的返回首页链接：浅蓝，hover 变白 */
+.page-head a {
+  color: #cfe3f7;
+  text-decoration: none;
+  font-size: 14px;
+}
+.page-head a:hover {
+  color: #ffffff;
 }
 .toolbar {
   display: flex;

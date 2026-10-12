@@ -1,0 +1,83 @@
+/**
+ * 念家鲜饺供应链系统 · V2 全局主题
+ * 设计依据：docs/07-品牌与设计规范.md（唯一权威色板）
+ * 主色 #157fd1 / 深蓝 ink #0e346b / 天蓝 #0f92d2 / 蓝灰 #707c9d
+ * 浅蓝雾 #7f97bc / 暖米底 #faf6f0 / 金黄点缀 #f5a623
+ * 做法：仅覆盖 Element Plus CSS 变量，不引入新 UI 库
+ */
+
+:root {
+  /* ---- 主色系列：按钮、链接、强调（light-N = 主色混白 N/10） ---- */
+  --el-color-primary: #157fd1;
+  --el-color-primary-light-3: #5ba5df; /* 混白 30%：hover / 描边 */
+  --el-color-primary-light-5: #8abfe8; /* 混白 50%：禁用态 */
+  --el-color-primary-light-7: #b9d9f1; /* 混白 70%：浅底 */
+  --el-color-primary-light-8: #d0e5f6; /* 混白 80%：浅底 / 卡片描边 */
+  --el-color-primary-light-9: #e8f2fa; /* 混白 90%：卡片浅底 / hover 背景 */
+  --el-color-primary-dark-2: #1166a7;  /* 混黑 20%：按下态 */
+  /* 供 rgba() 场景（阴影、遮罩）使用的 RGB 三元组，须与主色一致 */
+  --el-color-primary-rgb: 21, 127, 209;
+
+  /* ---- 圆角与字体：圆角 8px 起，卡片 12px；字体走系统栈，不引外部字体 ---- */
+  --el-border-radius-base: 8px;
+  --el-border-radius-small: 6px;
+  --el-font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+
+  /* ---- 页面底色：暖米底表达「家的温度」 ---- */
+  --el-bg-color-page: #faf6f0;
+  --el-fill-color-blank: #ffffff;
+
+  /* ---- 品牌语义色：供自定义样式引用，不在组件里硬编码新色 ---- */
+  --nf-primary: #157fd1;
+  --nf-ink: #0e346b;
+  --nf-sky: #0f92d2;
+  --nf-slate: #707c9d;
+  --nf-mist: #7f97bc;
+  --nf-cream: #faf6f0;
+  --nf-gold: #f5a623;
+
+  /* ---- 卡片圆角统一 12px（Element 默认 4px） ---- */
+  --el-card-border-radius: 12px;
+
+  /* ---- 侧边栏深蓝菜单：背景深蓝，菜单项文字白，激活项主蓝高亮 ---- */
+  --el-menu-bg-color: #0e346b;
+  --el-menu-text-color: rgba(255, 255, 255, 0.85);
+  --el-menu-hover-text-color: #ffffff;
+  --el-menu-hover-bg-color: rgba(15, 146, 210, 0.22);
+  --el-menu-active-color: #ffffff;
+  --el-menu-border-color: transparent;
+}
+
+/* ---- 侧边栏激活项：主蓝高亮块（文字保持白色） ---- */
+.el-menu-item.is-active,
+.el-sub-menu.is-active > .el-sub-menu__title {
+  background-color: var(--nf-primary);
+  color: #ffffff;
+}
+
+/* ---- 全局背景：暖米底，覆盖 html/body/#app ---- */
+html,
+body,
+#app {
+  background-color: var(--nf-cream);
+}
+
+/* ---- 滚动条：仅做细节修饰，继承主题色，不另造组件 ---- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--nf-mist) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--nf-mist);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--nf-primary);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}

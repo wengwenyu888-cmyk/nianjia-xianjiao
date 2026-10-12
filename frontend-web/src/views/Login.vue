@@ -42,9 +42,35 @@ async function handleLogin(): Promise<void> {
 </script>
 
 <template>
+  <!-- V2：蓝渐变背景 + 居中白卡片 + 饺子 logo + 品牌 slogan -->
   <div class="login-page">
     <div class="login-card">
-      <div class="logo">念家鲜饺</div>
+      <!-- 饺子 logo：内联 SVG，两段圆弧拼出月牙饺身，金黄 #f5a623 勾出褶边（不引外部图片） -->
+      <div class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="64" height="64" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="nfDumpling" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#0f92d2" />
+              <stop offset="100%" stop-color="#0e346b" />
+            </linearGradient>
+          </defs>
+          <!-- 饺身：上弧 + 下弧两段圆弧闭合 -->
+          <path d="M6 38 A26 26 0 0 1 58 38 A34 9 0 0 0 6 38 Z" fill="url(#nfDumpling)" />
+          <!-- 褶边：金黄弧线点缀 -->
+          <path
+            d="M13 33 Q32 20 51 33"
+            stroke="#f5a623"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            fill="none"
+          />
+          <circle cx="32" cy="22" r="2.2" fill="#f5a623" />
+        </svg>
+      </div>
+
+      <div class="brand">念家鲜饺</div>
+      <div class="slogan">吃鲜饺，想念家</div>
+      <div class="promise">馅不隔夜 · 现包现煮</div>
       <div class="sub">供应链系统 · 总部统采统配平台</div>
 
       <el-form class="login-form" :model="form" label-position="top" @submit.prevent="handleLogin">
@@ -80,6 +106,7 @@ async function handleLogin(): Promise<void> {
 </template>
 
 <style scoped>
+/* 页面：天蓝 → 深蓝 对角渐变（docs/07：蓝 = 信赖与品质） */
 .login-page {
   min-height: 100vh;
   display: flex;
@@ -87,28 +114,49 @@ async function handleLogin(): Promise<void> {
   justify-content: center;
   padding: 24px;
   box-sizing: border-box;
-  /* 与原型 body.nf-auth 一致的淡色渐变背景 */
-  background: linear-gradient(150deg, #fdeceb 0%, #f5f7fa 45%, #eaf1f8 100%);
+  background: linear-gradient(135deg, #0f92d2 0%, #0e346b 100%);
 }
+/* 居中白卡片：12px 圆角 + 柔和阴影 */
 .login-card {
   width: 100%;
   max-width: 400px;
-  background: #fff;
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(31, 45, 61, 0.12);
+  box-shadow: 0 18px 44px rgba(14, 52, 107, 0.28);
   padding: 32px 28px 24px;
   text-align: center;
 }
-.logo {
+.logo-mark {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+/* 品牌名：深蓝 ink，加粗 + 字距 */
+.brand {
   font-size: 26px;
   font-weight: 700;
-  color: #c0392b;
+  color: #0e346b;
   letter-spacing: 4px;
+}
+/* slogan：主色 */
+.slogan {
+  font-size: 15px;
+  font-weight: 600;
+  color: #157fd1;
+  letter-spacing: 2px;
+  margin-top: 8px;
+}
+/* 品牌承诺行：蓝灰辅助文字 */
+.promise {
+  font-size: 12px;
+  color: #707c9d;
+  letter-spacing: 1px;
+  margin-top: 6px;
 }
 .sub {
   font-size: 12px;
-  color: #909399;
-  margin-top: 6px;
+  color: #7f97bc;
+  margin-top: 10px;
 }
 .login-form {
   margin-top: 24px;
