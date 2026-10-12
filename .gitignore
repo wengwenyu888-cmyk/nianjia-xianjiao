@@ -68,6 +68,7 @@ s1only.txt
 verify.ps1
 opencode-demo/
 _scout-raw/
+desktop/_smoke-result.txt
 
 .tmp-asar/
 _plugin-audit/
