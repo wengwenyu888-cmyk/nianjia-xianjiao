@@ -57,10 +57,12 @@ def test_create_supplier_route(client: TestClient, service: FakeMasterService) -
 
 
 def test_create_supplier_rejects_negative_payment_terms(client: TestClient) -> None:
+    """账期为负属参数校验：按 docs/02 §8.1 统一为 400 + 40000。"""
     resp = client.post(
         "/api/v1/suppliers", json={"supplier_no": "G011", "name": "坏账期", "payment_terms": -1}
     )
-    assert resp.status_code == 422
+    assert resp.status_code == 400
+    assert resp.json()["code"] == 40000
 
 
 def test_list_suppliers_requires_read_permission(

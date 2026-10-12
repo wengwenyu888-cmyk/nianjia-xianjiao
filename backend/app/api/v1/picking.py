@@ -12,23 +12,15 @@
 from __future__ import annotations
 
 from datetime import date
-from enum import StrEnum
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, Path, Query
 
-from app.core.deps import CurrentUser, DbSession, Pagination, require_permission
+from app.core.deps import CurrentUser, DbSession, Pagination, PermissionCode, require_permission
 from app.schema.common import ApiResponse, ok
 from app.schema.summary import PickCreate, PickOut, PickPage
 
 router = APIRouter()
-
-
-class PickPermission(StrEnum):
-    """分拣模块权限点（§8.3），取值即 permission.code。"""
-
-    CREATE = "pick:create"
-    COMPLETE = "pick:complete"
 
 
 def get_summary_service() -> Any:
@@ -51,7 +43,7 @@ def create_pick(
     db: DbSession,
     user: CurrentUser,
     service: SummaryService,
-    _: Annotated[dict[str, Any], Depends(require_permission(PickPermission.CREATE))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.PICK_CREATE))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[PickOut]:
     """POST /picks：FIFO 锁定并扣减总部仓批次结存，同事务写批次流水，落批次明细。"""
@@ -67,7 +59,7 @@ def list_picks(
     pagination: Pagination,
     user: CurrentUser,
     service: SummaryService,
-    _: Annotated[dict[str, Any], Depends(require_permission(PickPermission.CREATE))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.PICK_CREATE))],
     require_date: Annotated[date | None, Query(description="需求配送日 YYYY-MM-DD")] = None,
     summary_id: Annotated[int | None, Query(ge=1, description="汇总单 id")] = None,
     store_id: Annotated[int | None, Query(ge=1, description="门店 id")] = None,
@@ -103,7 +95,7 @@ def complete_pick(
     db: DbSession,
     user: CurrentUser,
     service: SummaryService,
-    _: Annotated[dict[str, Any], Depends(require_permission(PickPermission.COMPLETE))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.PICK_COMPLETE))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[PickOut]:
     """POST /picks/{id}/complete：created/picking→done；全部门店完成后汇总单→picked。"""

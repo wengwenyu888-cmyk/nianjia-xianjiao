@@ -10,23 +10,16 @@ GET /signs/{id}         签收单详情   admin, ops, store_manager(限本店)  
 
 from __future__ import annotations
 
-from enum import StrEnum
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Path
 
 from app.api.v1.delivery import actor_from_user
-from app.core.deps import CurrentUser, DbSession, require_permission
+from app.core.deps import CurrentUser, DbSession, PermissionCode, require_permission
 from app.schema.common import ApiResponse, ok
 from app.schema.delivery import SignOut
 
 router = APIRouter()
-
-
-class ReceiptPermission(StrEnum):
-    """本组权限点（§8.3）。"""
-
-    SIGN_READ = "sign:read"
 
 
 def get_receipt_service() -> Any:
@@ -45,7 +38,7 @@ def get_sign(
     db: DbSession,
     user: CurrentUser,
     service: ReceiptService,
-    _: Annotated[dict[str, Any], Depends(require_permission(ReceiptPermission.SIGN_READ))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.SIGN_READ))],
 ) -> ApiResponse[SignOut]:
     """GET /signs/{id}：签收单 + 明细（含差异生成列）+ 关联配送单号；门店账号限本店。"""
     detail = service.get_sign(db, sign_id, actor=actor_from_user(user))

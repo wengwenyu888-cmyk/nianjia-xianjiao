@@ -11,23 +11,15 @@
 from __future__ import annotations
 
 from datetime import date
-from enum import StrEnum
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, Query
 
-from app.core.deps import CurrentUser, DbSession, Pagination, require_permission
+from app.core.deps import CurrentUser, DbSession, Pagination, PermissionCode, require_permission
 from app.schema.common import ApiResponse, ok
 from app.schema.summary import SummaryGenerate, SummaryOut, SummaryPage, SummaryStatusValue
 
 router = APIRouter()
-
-
-class SummaryPermission(StrEnum):
-    """汇总模块权限点（§8.3），取值即 permission.code。"""
-
-    GENERATE = "summary:generate"
-    READ = "summary:read"
 
 
 def get_summary_service() -> Any:
@@ -50,7 +42,7 @@ def generate_summary(
     db: DbSession,
     user: CurrentUser,
     service: SummaryService,
-    _: Annotated[dict[str, Any], Depends(require_permission(SummaryPermission.GENERATE))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.SUMMARY_GENERATE))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[SummaryOut]:
     """POST /summaries/generate：一配送日一张（uk_req_date），重复触发只落一张。"""
@@ -69,7 +61,7 @@ def list_summaries(
     pagination: Pagination,
     user: CurrentUser,
     service: SummaryService,
-    _: Annotated[dict[str, Any], Depends(require_permission(SummaryPermission.READ))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.SUMMARY_READ))],
     require_date: Annotated[date | None, Query(description="需求配送日 YYYY-MM-DD")] = None,
     status_filter: Annotated[
         SummaryStatusValue | None,

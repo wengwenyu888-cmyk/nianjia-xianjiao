@@ -48,6 +48,7 @@ def test_create_price_route(client: TestClient, service: FakeMasterService) -> N
 
 
 def test_create_price_rejects_inverted_range(client: TestClient) -> None:
+    """生效区间倒置属参数校验：按 docs/02 §8.1 统一为 400 + 40000。"""
     resp = client.post(
         "/api/v1/prices",
         json={
@@ -58,12 +59,15 @@ def test_create_price_rejects_inverted_range(client: TestClient) -> None:
             "effective_to": "2026-01-01",
         },
     )
-    assert resp.status_code == 422
+    assert resp.status_code == 400
+    assert resp.json()["code"] == 40000
 
 
-def test_list_prices_requires_sku_id(client: TestClient) -> None:
-    resp = client.get("/api/v1/prices")
-    assert resp.status_code == 422
+def test_list_prices_rejects_non_positive_sku_id(client: TestClient) -> None:
+    """sku_id 给定时必须 >0（契约允许缺省=返回全部价目）：400 + 40000。"""
+    resp = client.get("/api/v1/prices", params={"sku_id": 0})
+    assert resp.status_code == 400
+    assert resp.json()["code"] == 40000
 
 
 def test_list_prices_passes_date_and_sku(client: TestClient, service: FakeMasterService) -> None:

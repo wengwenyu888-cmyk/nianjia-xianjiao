@@ -11,18 +11,17 @@ POST /purchase-orders/{id}/receive  ops            purchase:receive
 幂等（§8.1）：写接口支持请求头 Idempotency-Key（≤64 字符）——建单落
 purchase_order.idempotency_key（uk_idem 唯一索引兜底），收货用于同键重放。
 
-权限点：deps.PermissionCode 当前只含主数据模块的权限点，本模块以本地 StrEnum 声明 §8.3
-中本组所需权限点；判定仍走 require_permission（比对权限点并集），待 deps 统一收口后可直接替换。
+权限点（§8.3）：purchase:create / purchase:read / purchase:receive 统一取自 core/deps.py 的
+PermissionCode（本模块不再本地声明枚举），判定仍走 require_permission。
 """
 
 from __future__ import annotations
 
-from enum import StrEnum
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, Path, Query
 
-from app.core.deps import CurrentUser, DbSession, Pagination, require_permission
+from app.core.deps import CurrentUser, DbSession, Pagination, PermissionCode, require_permission
 from app.schema.common import ApiResponse, ok
 from app.schema.purchase import (
     PurchaseCreate,
@@ -38,14 +37,6 @@ router = APIRouter()
 IdempotencyKey = Annotated[
     str | None, Header(alias="Idempotency-Key", max_length=64, description="幂等键，≤64 字符")
 ]
-
-
-class PurchasePermission(StrEnum):
-    """本组权限点（§8.3），取值即 permission.code。"""
-
-    CREATE = "purchase:create"
-    READ = "purchase:read"
-    RECEIVE = "purchase:receive"
 
 
 def get_purchase_service() -> Any:
@@ -64,7 +55,7 @@ def create_purchase_order(
     db: DbSession,
     user: CurrentUser,
     service: PurchaseService,
-    _: Annotated[dict[str, Any], Depends(require_permission(PurchasePermission.CREATE))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.PURCHASE_CREATE))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[PurchaseOrderOut]:
     """POST /purchase-orders：落采购单(draft)+明细，单价缺省取 price 表 purchase 当时价。"""
@@ -83,7 +74,7 @@ def list_purchase_orders(
     pagination: Pagination,
     user: CurrentUser,
     service: PurchaseService,
-    _: Annotated[dict[str, Any], Depends(require_permission(PurchasePermission.READ))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.PURCHASE_READ))],
     status_filter: Annotated[
         PurchaseStatusValue | None,
         Query(alias="status", description="draft/submitted/received/cancelled"),
@@ -117,7 +108,7 @@ def receive_purchase_order(
     db: DbSession,
     user: CurrentUser,
     service: PurchaseService,
-    _: Annotated[dict[str, Any], Depends(require_permission(PurchasePermission.RECEIVE))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.PURCHASE_RECEIVE))],
     payload: ReceiveIn | None = None,
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[PurchaseOrderOut]:

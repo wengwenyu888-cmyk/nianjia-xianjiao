@@ -11,19 +11,18 @@ POST /deliveries/{id}/sign     store_manager, driver  sign:create
     api_router.include_router(delivery.router, prefix="/deliveries", tags=["配送签收"])
 签收单详情 GET /signs/{id} 在 receipt.py（同一条业务链，单独前缀 /signs）。
 
-权限点：deps.PermissionCode 当前只含主数据模块的权限点，本模块以本地 StrEnum 声明 §8.3 中
-本组所需权限点；判定仍走 require_permission（比对权限点并集），待 deps 统一收口后可直接替换。
+权限点（§8.3）：delivery:create / delivery:read / delivery:depart / sign:create 统一取自
+core/deps.py 的 PermissionCode（本模块不再本地声明枚举），判定仍走 require_permission。
 """
 
 from __future__ import annotations
 
 from datetime import date
-from enum import StrEnum
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Header, Path, Query
 
-from app.core.deps import CurrentUser, DbSession, Pagination, require_permission
+from app.core.deps import CurrentUser, DbSession, Pagination, PermissionCode, require_permission
 from app.schema.common import ApiResponse, ok
 from app.schema.delivery import (
     DeliveryCreate,
@@ -40,15 +39,6 @@ router = APIRouter()
 IdempotencyKey = Annotated[
     str | None, Header(alias="Idempotency-Key", max_length=64, description="幂等键，≤64 字符")
 ]
-
-
-class DeliveryPermission(StrEnum):
-    """本组权限点（§8.3）。"""
-
-    CREATE = "delivery:create"
-    READ = "delivery:read"
-    DEPART = "delivery:depart"
-    SIGN_CREATE = "sign:create"
 
 
 def actor_from_user(user: dict[str, Any]) -> Actor:
@@ -79,7 +69,7 @@ def create_delivery(
     db: DbSession,
     user: CurrentUser,
     service: DeliveryService,
-    _: Annotated[dict[str, Any], Depends(require_permission(DeliveryPermission.CREATE))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.DELIVERY_CREATE))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[DeliveryOut]:
     """POST /deliveries：落配送单(loaded)+明细；items 缺省按分拣明细派生，重复提交返回首次结果。"""
@@ -100,7 +90,7 @@ def list_deliveries(
     pagination: Pagination,
     user: CurrentUser,
     service: DeliveryService,
-    _: Annotated[dict[str, Any], Depends(require_permission(DeliveryPermission.READ))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.DELIVERY_READ))],
     driver_id: Annotated[int | None, Query(gt=0, description="司机id；纯司机按本人过滤")] = None,
     require_date: Annotated[date | None, Query(description="配送日 YYYY-MM-DD")] = None,
     status_filter: Annotated[
@@ -133,7 +123,7 @@ def get_delivery(
     db: DbSession,
     user: CurrentUser,
     service: DeliveryService,
-    _: Annotated[dict[str, Any], Depends(require_permission(DeliveryPermission.READ))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.DELIVERY_READ))],
 ) -> ApiResponse[DeliveryOut]:
     """GET /deliveries/{id}：带全量明细；司机只能看自己的任务，门店账号只能看本店。"""
     delivery = service.get_delivery(db, delivery_id, actor=actor_from_user(user))
@@ -147,7 +137,7 @@ def depart_delivery(
     db: DbSession,
     user: CurrentUser,
     service: DeliveryService,
-    _: Annotated[dict[str, Any], Depends(require_permission(DeliveryPermission.DEPART))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.DELIVERY_DEPART))],
 ) -> ApiResponse[DeliveryOut]:
     """POST /deliveries/{id}/depart：loaded → on_way；非法流转 40900。"""
     delivery = service.depart(
@@ -163,7 +153,7 @@ def sign_delivery(
     db: DbSession,
     user: CurrentUser,
     service: DeliveryService,
-    _: Annotated[dict[str, Any], Depends(require_permission(DeliveryPermission.SIGN_CREATE))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.SIGN_CREATE))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[SignOut]:
     """POST /deliveries/{id}/sign：写 sign+sign_item（差异由生成列计算）并落定门店库存。

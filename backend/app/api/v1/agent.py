@@ -13,12 +13,11 @@
 
 from __future__ import annotations
 
-from enum import StrEnum
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, Path
 
-from app.core.deps import CurrentUser, DbSession, require_permission
+from app.core.deps import CurrentUser, DbSession, PermissionCode, require_permission
 from app.schema.agent import (
     PickPlanOut,
     PickPlanRequest,
@@ -29,15 +28,6 @@ from app.schema.common import ApiResponse, ok
 from app.schema.order import OrderOut
 
 router = APIRouter()
-
-
-class AgentPermission(StrEnum):
-    """智能体模块权限点（§8.3），取值即 permission.code。"""
-
-    SUGGEST = "agent:suggest"
-    READ = "agent:read"
-    APPLY = "agent:apply"
-    PICK_PLAN = "agent:pick_plan"
 
 
 def get_agent_service() -> Any:
@@ -64,7 +54,7 @@ def create_order_suggestions(
     db: DbSession,
     user: CurrentUser,
     service: AgentService,
-    _: Annotated[dict[str, Any], Depends(require_permission(AgentPermission.SUGGEST))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.AGENT_SUGGEST))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[SuggestionOut]:
     """POST /agent/order-suggestions：规则版建议（近 7 天均值 × 星期系数 + 库存/效期校正）。"""
@@ -88,7 +78,7 @@ def get_order_suggestion(
     db: DbSession,
     user: CurrentUser,
     service: AgentService,
-    _: Annotated[dict[str, Any], Depends(require_permission(AgentPermission.READ))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.AGENT_READ))],
 ) -> ApiResponse[SuggestionOut]:
     """GET /agent/order-suggestions/{id}：读 agent_suggestion.payload（生成当时的依据快照）。"""
     suggestion = service.get_suggestion(db, suggestion_id, store_id_scope=user.get("store_id"))
@@ -105,7 +95,7 @@ def apply_order_suggestion(
     db: DbSession,
     user: CurrentUser,
     service: AgentService,
-    _: Annotated[dict[str, Any], Depends(require_permission(AgentPermission.APPLY))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.AGENT_APPLY))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[OrderOut]:
     """POST /agent/order-suggestions/{id}/apply：只生成 draft 要货单，须店长 confirm 才生效。"""
@@ -127,7 +117,7 @@ def create_pick_plan(
     db: DbSession,
     user: CurrentUser,
     service: AgentService,
-    _: Annotated[dict[str, Any], Depends(require_permission(AgentPermission.PICK_PLAN))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.AGENT_PICK_PLAN))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[PickPlanOut]:
     """POST /agent/pick-plan：只读 FIFO 预演（不锁行/不扣结存/不写流水），落 pick_plan 快照。"""

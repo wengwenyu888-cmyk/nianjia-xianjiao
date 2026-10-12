@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
 from jose import JWTError, jwt
@@ -57,7 +57,7 @@ def create_access_token(
 ) -> str:
     """签发 access token。payload 只放最小必要信息。"""
     minutes = expires_minutes or settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     payload: dict[str, Any] = {
         "sub": str(subject),
         "role": role,
@@ -71,7 +71,7 @@ def create_access_token(
 
 def create_refresh_token(subject: str | int, *, role: Role = "hq") -> str:
     """签发 refresh token；生产环境中其 jti 需落库以支持撤销。"""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     payload: dict[str, Any] = {
         "sub": str(subject),
         "role": role,

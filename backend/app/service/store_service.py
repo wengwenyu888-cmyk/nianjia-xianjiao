@@ -140,7 +140,7 @@ def paginate[T](items: Sequence[T], *, page: int, page_size: int) -> PageResult[
     """内存分页（纯逻辑，便于单测）。"""
     total = len(items)
     start = (page - 1) * page_size
-    return PageResult(items=list(items[start:start + page_size]), total=total)
+    return PageResult(items=list(items[start : start + page_size]), total=total)
 
 
 def current_version_token(entity: Any) -> int | None:
@@ -449,9 +449,7 @@ def create_supplier(
             idempotency_key=idempotency_key,
         ),
         request_fingerprint=fingerprint_payload(values),
-        existing_fingerprint=lambda entity: fingerprint_entity(
-            entity, SUPPLIER_FINGERPRINT_FIELDS
-        ),
+        existing_fingerprint=lambda entity: fingerprint_entity(entity, SUPPLIER_FINGERPRINT_FIELDS),
         conflict_message="供应商编码已存在且内容与首次提交不一致",
     )
 
@@ -491,7 +489,10 @@ def list_prices(
     page: int = 1,
     page_size: int = 20,
 ) -> PageResult[Price]:
-    """查价目：sku_id 缺省返回全部价目；date 命中生效区间 [effective_from, effective_to]（NULL=现行有效）。"""
+    """查价目：sku_id 缺省返回全部价目。
+
+    date 命中生效区间 [effective_from, effective_to]（NULL 表示现行有效）。
+    """
     conditions = [_not_deleted(Price)]
     if sku_id is not None:
         conditions.append(Price.sku_id == sku_id)

@@ -92,9 +92,7 @@ _include_optional("loss", prefix="/losses", probe="/losses", tags=["报损"])
 _include_optional("settlement", prefix="/reconciles", probe="/reconciles", tags=["对账核算"])
 
 
-def _include_optional_extra(
-    module_name: str, attr: str, *, prefix: str, tags: list[str]
-) -> None:
+def _include_optional_extra(module_name: str, attr: str, *, prefix: str, tags: list[str]) -> None:
     """注册模块内额外暴露的 router（如 settlement.stores_router）。
 
     背景：_include_optional 只取 module.router；而 settlement 为覆盖 /stores 前缀
@@ -111,9 +109,7 @@ def _include_optional_extra(
 
 
 # 门店报表（§8.2）：GET /stores/{id}/profit、GET /stores/{id}/kpi
-_include_optional_extra(
-    "settlement", "stores_router", prefix="/stores", tags=["对账核算-门店报表"]
-)
+_include_optional_extra("settlement", "stores_router", prefix="/stores", tags=["对账核算-门店报表"])
 
 # 库存（并行开发中）：GET /stocks、GET /stocks/alerts、GET /stock-flows
 # stock_api.router 内部自带 /stocks 与 /stock-flows 全路径，故不叠加 prefix。

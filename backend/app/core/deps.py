@@ -52,8 +52,13 @@ DbSession = Annotated[Session, Depends(get_db)]
 
 # --------------------------------------------------------------------------- 权限点
 class PermissionCode(StrEnum):
-    """主数据模块权限点（§8.3）。判定单元是权限点，角色只是权限点集合。"""
+    """全部权限点（§8.3，39 条；取值与 seed/seed.py 的 PERMISSIONS 逐字一致）。
 
+    判定单元是权限点，角色只是权限点集合；本枚举是代码侧唯一定义处，
+    api 层一律 require_permission(PermissionCode.XXX)，不再各自声明本地 StrEnum。
+    """
+
+    # 主数据 master（8）
     STORE_READ = "master:store:read"
     STORE_WRITE = "master:store:write"
     SKU_READ = "master:sku:read"
@@ -63,10 +68,70 @@ class PermissionCode(StrEnum):
     PRICE_READ = "master:price:read"
     PRICE_WRITE = "master:price:write"
 
+    # 采购 purchase（3）
+    PURCHASE_CREATE = "purchase:create"
+    PURCHASE_READ = "purchase:read"
+    PURCHASE_RECEIVE = "purchase:receive"
 
-# 内置角色 → 主数据权限点（§8.3「默认角色」列展开）；运行时与库中 role_permission 取并集
+    # 要货 order（5）
+    ORDER_CREATE = "order:create"
+    ORDER_UPDATE = "order:update"
+    ORDER_CONFIRM = "order:confirm"
+    ORDER_CANCEL = "order:cancel"
+    ORDER_READ = "order:read"
+
+    # 智能体 agent（4）
+    AGENT_SUGGEST = "agent:suggest"
+    AGENT_READ = "agent:read"
+    AGENT_APPLY = "agent:apply"
+    AGENT_PICK_PLAN = "agent:pick_plan"
+
+    # 汇总 summary（2）
+    SUMMARY_GENERATE = "summary:generate"
+    SUMMARY_READ = "summary:read"
+
+    # 分拣 pick（2）
+    PICK_CREATE = "pick:create"
+    PICK_COMPLETE = "pick:complete"
+
+    # 配送 delivery（3）
+    DELIVERY_CREATE = "delivery:create"
+    DELIVERY_READ = "delivery:read"
+    DELIVERY_DEPART = "delivery:depart"
+
+    # 签收 sign（2）
+    SIGN_CREATE = "sign:create"
+    SIGN_READ = "sign:read"
+
+    # 报损 loss（2）
+    LOSS_CREATE = "loss:create"
+    LOSS_READ = "loss:read"
+
+    # 库存 stock（2）
+    STOCK_READ = "stock:read"
+    STOCK_ADJUST = "stock:adjust"
+
+    # 对账 reconcile（3）
+    RECONCILE_GENERATE = "reconcile:generate"
+    RECONCILE_READ = "reconcile:read"
+    RECONCILE_CONFIRM = "reconcile:confirm"
+
+    # 报表 report（2）
+    REPORT_PROFIT = "report:profit"
+    REPORT_KPI = "report:kpi"
+
+    # 系统 system（1，预留：当前无对外端点）
+    SYSTEM_PERMISSION_MANAGE = "system:permission:manage"
+
+
+# 内置角色 → 权限点（§8.3「默认角色」列，与 seed/seed.py 的 ROLE_PERMISSION_CODES 对齐）。
+# 生产以数据库 role_permission 为准（seed 写入的权威授权）；本表仅为未 seed 环境的兜底，
+# 运行时与库中授权取并集（见 load_user_authorities）。
+# 条数：admin 39 / ops 26 / store_manager 12 / driver 3。
 ROLE_PERMISSIONS: dict[str, frozenset[PermissionCode]] = {
+    # admin：全量 39 条
     "admin": frozenset(PermissionCode),
+    # ops（26）：主数据 + 采购收货 + 汇总分拣 + 报损审批 + 对账/报表
     "ops": frozenset(
         {
             PermissionCode.STORE_READ,
@@ -75,6 +140,52 @@ ROLE_PERMISSIONS: dict[str, frozenset[PermissionCode]] = {
             PermissionCode.SUPPLIER_READ,
             PermissionCode.SUPPLIER_WRITE,
             PermissionCode.PRICE_READ,
+            PermissionCode.PURCHASE_CREATE,
+            PermissionCode.PURCHASE_READ,
+            PermissionCode.PURCHASE_RECEIVE,
+            PermissionCode.ORDER_READ,
+            PermissionCode.AGENT_SUGGEST,
+            PermissionCode.AGENT_READ,
+            PermissionCode.AGENT_PICK_PLAN,
+            PermissionCode.SUMMARY_GENERATE,
+            PermissionCode.SUMMARY_READ,
+            PermissionCode.PICK_CREATE,
+            PermissionCode.PICK_COMPLETE,
+            PermissionCode.DELIVERY_CREATE,
+            PermissionCode.DELIVERY_READ,
+            PermissionCode.SIGN_READ,
+            PermissionCode.LOSS_READ,
+            PermissionCode.STOCK_READ,
+            PermissionCode.STOCK_ADJUST,
+            PermissionCode.RECONCILE_READ,
+            PermissionCode.REPORT_PROFIT,
+            PermissionCode.REPORT_KPI,
+        }
+    ),
+    # store_manager（12）：要货 + 报损 + 智能体建议 + 配送/签收只读；
+    # delivery:read 为 2026-10-12 补齐（店长签收前需查看配送单明细，见 §8.3）
+    "store_manager": frozenset(
+        {
+            PermissionCode.ORDER_CREATE,
+            PermissionCode.ORDER_UPDATE,
+            PermissionCode.ORDER_CONFIRM,
+            PermissionCode.ORDER_CANCEL,
+            PermissionCode.ORDER_READ,
+            PermissionCode.AGENT_SUGGEST,
+            PermissionCode.AGENT_READ,
+            PermissionCode.AGENT_APPLY,
+            PermissionCode.SIGN_CREATE,
+            PermissionCode.SIGN_READ,
+            PermissionCode.LOSS_CREATE,
+            PermissionCode.DELIVERY_READ,
+        }
+    ),
+    # driver（3）：配送签收
+    "driver": frozenset(
+        {
+            PermissionCode.DELIVERY_READ,
+            PermissionCode.DELIVERY_DEPART,
+            PermissionCode.SIGN_CREATE,
         }
     ),
 }

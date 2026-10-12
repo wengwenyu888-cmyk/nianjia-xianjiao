@@ -60,6 +60,7 @@ def test_create_sku_route(client: TestClient, service: FakeMasterService) -> Non
 
 
 def test_create_sku_rejects_non_positive_convert_factor(client: TestClient) -> None:
+    """换算因子必须 >0：按 docs/02 §8.1 统一为 400 + 40000。"""
     body = {
         "sku_no": "K011",
         "name": "坏换算",
@@ -70,7 +71,8 @@ def test_create_sku_rejects_non_positive_convert_factor(client: TestClient) -> N
         "shelf_life_hours": 24,
     }
     resp = client.post("/api/v1/skus", json=body)
-    assert resp.status_code == 422
+    assert resp.status_code == 400
+    assert resp.json()["code"] == 40000
 
 
 def test_create_sku_requires_permission(client: TestClient, service: FakeMasterService) -> None:

@@ -52,9 +52,7 @@ def list_prices(
     user: CurrentUser,
     service: MasterService,
     _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.PRICE_READ))],
-    sku_id: Annotated[
-        int | None, Query(gt=0, description="SKU id，缺省返回全部价目")
-    ] = None,
+    sku_id: Annotated[int | None, Query(gt=0, description="SKU id，缺省返回全部价目")] = None,
     on_date: Annotated[
         date | None, Query(alias="date", description="YYYY-MM-DD，命中生效区间")
     ] = None,

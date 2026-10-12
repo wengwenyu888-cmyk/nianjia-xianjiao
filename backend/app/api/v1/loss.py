@@ -13,13 +13,12 @@ loss.idempotency_key 的语义是「提交请求幂等键」，由 POST /losses 
 
 from __future__ import annotations
 
-from enum import StrEnum
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Header, Path, Query
 
 from app.api.v1.delivery import actor_from_user
-from app.core.deps import CurrentUser, DbSession, Pagination, require_permission
+from app.core.deps import CurrentUser, DbSession, Pagination, PermissionCode, require_permission
 from app.schema.common import ApiResponse, ok
 from app.schema.loss import LossCreate, LossOut, LossPage
 
@@ -28,14 +27,6 @@ router = APIRouter()
 IdempotencyKey = Annotated[
     str | None, Header(alias="Idempotency-Key", max_length=64, description="幂等键，≤64 字符")
 ]
-
-
-class LossPermission(StrEnum):
-    """本组权限点（§8.3）。"""
-
-    CREATE = "loss:create"
-    READ = "loss:read"
-    STOCK_ADJUST = "stock:adjust"
 
 
 def get_loss_service() -> Any:
@@ -54,7 +45,7 @@ def create_loss(
     db: DbSession,
     user: CurrentUser,
     service: LossService,
-    _: Annotated[dict[str, Any], Depends(require_permission(LossPermission.CREATE))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.LOSS_CREATE))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[LossOut]:
     """POST /losses：落 draft 报损单（不动库存）；门店账号强制本店，重复提交返回首次结果。"""
@@ -74,7 +65,7 @@ def list_losses(
     pagination: Pagination,
     user: CurrentUser,
     service: LossService,
-    _: Annotated[dict[str, Any], Depends(require_permission(LossPermission.READ))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.LOSS_READ))],
     store_id: Annotated[int | None, Query(gt=0, description="门店id")] = None,
     status_filter: Annotated[
         Literal["draft", "approved"] | None, Query(alias="status", description="报损状态")
@@ -103,7 +94,7 @@ def approve_loss(
     db: DbSession,
     user: CurrentUser,
     service: LossService,
-    _: Annotated[dict[str, Any], Depends(require_permission(LossPermission.STOCK_ADJUST))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.STOCK_ADJUST))],
 ) -> ApiResponse[LossOut]:
     """POST /losses/{id}/approve：draft→approved，同事务扣减 batch_stock + 写 batch_flow。"""
     loss = service.approve_loss(db, loss_id, operator_id=user.get("user_id"))

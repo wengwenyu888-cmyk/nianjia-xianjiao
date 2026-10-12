@@ -14,20 +14,19 @@ prefix）；若改用 include_router(stock.router, prefix="/stocks") 会得到 /
 只读：三个端点均为 GET，不接收 Idempotency-Key（§8.1 幂等只覆盖写单据头表），
 不写 batch_stock / batch_flow，也不加行锁。
 
-权限点：deps.PermissionCode 目前只含主数据权限点，本模块以本地 StrEnum 声明 §8.3 的
-stock:read（取值与 seed/seed.py 的权限点一致）；判定仍走 require_permission（权限点并集）。
+权限点（§8.3）：stock:read 统一取自 core/deps.py 的 PermissionCode（取值与 seed/seed.py
+的权限点一致，本模块不再本地声明枚举）；判定仍走 require_permission（权限点并集）。
 数据范围：stock:read 只授予 admin / ops（见 §8.3），无门店账号，故查询不注入本店条件。
 """
 
 from __future__ import annotations
 
 from decimal import Decimal
-from enum import StrEnum
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query
 
-from app.core.deps import CurrentUser, DbSession, Pagination, require_permission
+from app.core.deps import CurrentUser, DbSession, Pagination, PermissionCode, require_permission
 from app.schema.common import ApiResponse, ok
 from app.schema.stock import (
     StockAlertsOut,
@@ -45,12 +44,6 @@ from app.service.stock_service import (
 )
 
 router = APIRouter()
-
-
-class StockPermission(StrEnum):
-    """库存模块权限点（§8.3），取值即 permission.code。"""
-
-    READ = "stock:read"
 
 
 def get_stock_service() -> Any:
@@ -73,7 +66,7 @@ def list_stocks(
     pagination: Pagination,
     user: CurrentUser,
     service: StockService,
-    _: Annotated[dict[str, Any], Depends(require_permission(StockPermission.READ))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.STOCK_READ))],
     store_id: Annotated[
         int | None, Query(ge=0, description="0=总部仓，其余=门店ID；缺省=全部门店与总部仓")
     ] = None,
@@ -116,7 +109,7 @@ def stock_alerts(
     db: DbSession,
     user: CurrentUser,
     service: StockService,
-    _: Annotated[dict[str, Any], Depends(require_permission(StockPermission.READ))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.STOCK_READ))],
     store_id: Annotated[
         int | None, Query(ge=0, description="0=总部仓；缺省=总部仓（与低库存口径一致）")
     ] = None,
@@ -151,7 +144,7 @@ def list_stock_flows(
     pagination: Pagination,
     user: CurrentUser,
     service: StockService,
-    _: Annotated[dict[str, Any], Depends(require_permission(StockPermission.READ))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.STOCK_READ))],
     store_id: Annotated[
         int | None, Query(ge=0, description="0=总部仓，其余=门店ID；缺省=全部")
     ] = None,

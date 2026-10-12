@@ -23,9 +23,9 @@ async def chat(prompt: str, *, system: str | None = None, **kwargs: Any) -> str:
     """
     if not settings.LLM_API_KEY:
         raise RuntimeError("未配置 LLM_API_KEY，智能体能力暂不可用")
-    messages: list[dict[str, str]] = (
-        [{"role": "system", "content": system}] if system else []
-    ) + [{"role": "user", "content": prompt}]
+    messages: list[dict[str, str]] = ([{"role": "system", "content": system}] if system else []) + [
+        {"role": "user", "content": prompt}
+    ]
     async with httpx.AsyncClient(base_url=settings.LLM_BASE_URL, timeout=30.0) as client:
         resp = await client.post(
             "/chat/completions",

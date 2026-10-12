@@ -20,13 +20,12 @@ PUT /stores/{id} 冲突（路径不同段数/方法）。
 from __future__ import annotations
 
 from decimal import Decimal
-from enum import StrEnum
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, Path, Query
 
 from app.api.v1.delivery import actor_from_user
-from app.core.deps import CurrentUser, DbSession, Pagination, require_permission
+from app.core.deps import CurrentUser, DbSession, Pagination, PermissionCode, require_permission
 from app.schema.common import ApiResponse, ok
 from app.schema.settlement import (
     ReconcileConfirm,
@@ -46,16 +45,6 @@ stores_router = APIRouter()
 IdempotencyKey = Annotated[
     str | None, Header(alias="Idempotency-Key", max_length=64, description="幂等键，≤64 字符")
 ]
-
-
-class SettlementPermission(StrEnum):
-    """本组权限点（§8.3）。"""
-
-    RECONCILE_GENERATE = "reconcile:generate"
-    RECONCILE_READ = "reconcile:read"
-    RECONCILE_CONFIRM = "reconcile:confirm"
-    REPORT_PROFIT = "report:profit"
-    REPORT_KPI = "report:kpi"
 
 
 def get_settlement_service() -> Any:
@@ -122,9 +111,7 @@ def generate_reconcile(
     db: DbSession,
     user: CurrentUser,
     service: SettlementService,
-    _: Annotated[
-        dict[str, Any], Depends(require_permission(SettlementPermission.RECONCILE_GENERATE))
-    ],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.RECONCILE_GENERATE))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[ReconcileGenerateOut]:
     """POST /reconciles/generate：按周期聚合配送签收数据逐店生成对账单（uk_store_period 幂等）。"""
@@ -151,7 +138,7 @@ def list_reconciles(
     pagination: Pagination,
     user: CurrentUser,
     service: SettlementService,
-    _: Annotated[dict[str, Any], Depends(require_permission(SettlementPermission.RECONCILE_READ))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.RECONCILE_READ))],
     period: Annotated[
         str | None, Query(min_length=4, max_length=16, description="如 2026-W42")
     ] = None,
@@ -183,9 +170,7 @@ def confirm_reconcile(
     db: DbSession,
     user: CurrentUser,
     service: SettlementService,
-    _: Annotated[
-        dict[str, Any], Depends(require_permission(SettlementPermission.RECONCILE_CONFIRM))
-    ],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.RECONCILE_CONFIRM))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[ReconcileOut]:
     """POST /reconciles/{id}/confirm：记录与管家婆差异额并推进 draft→confirmed→done。"""
@@ -207,7 +192,7 @@ def get_store_profit(
     db: DbSession,
     user: CurrentUser,
     service: SettlementService,
-    _: Annotated[dict[str, Any], Depends(require_permission(SettlementPermission.REPORT_PROFIT))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.REPORT_PROFIT))],
     period: Annotated[str, Query(min_length=4, max_length=16, description="如 2026-W42")],
     revenue: Annotated[
         Decimal | None,
@@ -227,7 +212,7 @@ def get_store_kpi(
     db: DbSession,
     user: CurrentUser,
     service: SettlementService,
-    _: Annotated[dict[str, Any], Depends(require_permission(SettlementPermission.REPORT_KPI))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.REPORT_KPI))],
     period: Annotated[str, Query(min_length=4, max_length=16, description="如 2026-W42")],
 ) -> ApiResponse[StoreKpiOut]:
     """GET /stores/{id}/kpi?period=：损耗率/要货准确率/配送准确率/周转天数（SQL 聚合）。"""

@@ -26,9 +26,7 @@ def service() -> FakeMasterService:
 
 @pytest.fixture
 def client(service: FakeMasterService) -> Iterator[TestClient]:
-    install_overrides(
-        service, permissions={PermissionCode.STORE_READ, PermissionCode.STORE_WRITE}
-    )
+    install_overrides(service, permissions={PermissionCode.STORE_READ, PermissionCode.STORE_WRITE})
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
@@ -60,9 +58,10 @@ def test_list_stores_passes_keyword_and_store_scope(
 
 
 def test_list_stores_rejects_page_size_over_200(client: TestClient) -> None:
+    """page_size > 200 属参数校验：按 docs/02 §8.1 统一为 400 + 40000。"""
     resp = client.get("/api/v1/stores", params={"page_size": 201})
-    assert resp.status_code == 422
-    assert resp.json()["code"] in {40000, 42200}
+    assert resp.status_code == 400
+    assert resp.json()["code"] == 40000
 
 
 def test_create_store_route_and_idempotency_header(
@@ -82,9 +81,10 @@ def test_create_store_route_and_idempotency_header(
 
 
 def test_create_store_validates_required_fields(client: TestClient) -> None:
+    """缺必填字段属参数校验：400 + 40000，且回字段级原因。"""
     resp = client.post("/api/v1/stores", json={"store_no": "S010"})
-    assert resp.status_code == 422
-    assert resp.json()["code"] in {40000, 42200}
+    assert resp.status_code == 400
+    assert resp.json()["code"] == 40000
     assert resp.json()["data"]
 
 

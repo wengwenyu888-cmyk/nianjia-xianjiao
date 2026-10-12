@@ -7,35 +7,23 @@
 - POST /orders/{id}/cancel            取消（仅 confirmed 前）
 - GET  /orders?store_id=&require_date=&status=   查询要货单
 
-权限点（§8.3）：order:create / order:update / order:confirm / order:cancel / order:read。
-说明：这批权限点在 core/deps.py 的 PermissionCode 里尚未登记（该文件先落地了主数据模块），
-故此处用等值 StrEnum 声明，取值与 §8.3 逐字一致，后续并入 PermissionCode 可无缝替换。
+权限点（§8.3）：order:create / order:update / order:confirm / order:cancel / order:read，
+统一取自 core/deps.py 的 PermissionCode（本模块不再本地声明枚举）。
 数据范围（§8.1）：门店账号（user.store_id 非空）只能操作/查询本店数据，越权 40300。
 """
 
 from __future__ import annotations
 
 from datetime import date
-from enum import StrEnum
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, Path, Query
 
-from app.core.deps import CurrentUser, DbSession, Pagination, require_permission
+from app.core.deps import CurrentUser, DbSession, Pagination, PermissionCode, require_permission
 from app.schema.common import ApiResponse, ok
 from app.schema.order import OrderCreate, OrderOut, OrderPage, OrderStatusValue, OrderUpdate
 
 router = APIRouter()
-
-
-class OrderPermission(StrEnum):
-    """要货模块权限点（§8.3），取值即 permission.code。"""
-
-    CREATE = "order:create"
-    UPDATE = "order:update"
-    CONFIRM = "order:confirm"
-    CANCEL = "order:cancel"
-    READ = "order:read"
 
 
 def get_order_service() -> Any:
@@ -59,7 +47,7 @@ def create_order(
     db: DbSession,
     user: CurrentUser,
     service: OrderService,
-    _: Annotated[dict[str, Any], Depends(require_permission(OrderPermission.CREATE))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.ORDER_CREATE))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[OrderOut]:
     """POST /orders：建 draft 要货单；门店账号只能为本店建单，重复提交返回首次结果。"""
@@ -80,7 +68,7 @@ def update_order(
     db: DbSession,
     user: CurrentUser,
     service: OrderService,
-    _: Annotated[dict[str, Any], Depends(require_permission(OrderPermission.UPDATE))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.ORDER_UPDATE))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[OrderOut]:
     """PUT /orders/{id}：仅草稿可改；items 传入即整单覆盖，version 不一致 40900。"""
@@ -100,7 +88,7 @@ def confirm_order(
     db: DbSession,
     user: CurrentUser,
     service: OrderService,
-    _: Annotated[dict[str, Any], Depends(require_permission(OrderPermission.CONFIRM))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.ORDER_CONFIRM))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[OrderOut]:
     """POST /orders/{id}/confirm：draft→confirmed，落 confirm_by/confirm_at。"""
@@ -116,7 +104,7 @@ def cancel_order(
     db: DbSession,
     user: CurrentUser,
     service: OrderService,
-    _: Annotated[dict[str, Any], Depends(require_permission(OrderPermission.CANCEL))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.ORDER_CANCEL))],
     idempotency_key: IdempotencyKey = None,
 ) -> ApiResponse[OrderOut]:
     """POST /orders/{id}/cancel：仅 confirmed 前可取消，确认后 40900。"""
@@ -132,7 +120,7 @@ def list_orders(
     pagination: Pagination,
     user: CurrentUser,
     service: OrderService,
-    _: Annotated[dict[str, Any], Depends(require_permission(OrderPermission.READ))],
+    _: Annotated[dict[str, Any], Depends(require_permission(PermissionCode.ORDER_READ))],
     store_id: Annotated[int | None, Query(gt=0, description="门店 id，门店账号只能传本店")] = None,
     require_date: Annotated[date | None, Query(description="需求配送日 YYYY-MM-DD")] = None,
     status_filter: Annotated[

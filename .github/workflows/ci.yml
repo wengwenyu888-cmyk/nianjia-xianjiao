@@ -1,0 +1,128 @@
+name: CI
+
+# 触发：
+#  - push 到 main：校验
+#  - PR 到 main：校验（分支保护门禁）
+#  - workflow_dispatch：手动触发，可用于验证工作流本身
+# 注意：这里故意不加 workflow 级 paths 过滤。加了以后，纯 docs 改动会让整个工作流
+# 显示为 skipped；而 workflow_dispatch 也会被一起过滤掉。改为在下面的 changes job 中
+# 用 dorny/paths-filter 做同等的路径过滤，效果一致且行为可观测。
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# 同一分支/PR 的新推送取消仍在运行的旧任务，避免排队浪费
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 权限最小化：CI 只读仓库内容
+permissions:
+  contents: read
+
+jobs:
+  # 判断本次变更落在哪个子项目，供 job 级 if 使用（fail-fast 的等价路径过滤）
+  changes:
+    name: Detect Changed Paths
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - '.github/workflows/ci.yml'
+            frontend:
+              - 'frontend-web/**'
+              - '.github/workflows/ci.yml'
+
+  backend:
+    name: Backend Lint & Test
+    needs: changes
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      # 完全按 uv.lock 安装，禁止依赖漂移
+      - name: Install dependencies
+        run: uv sync --frozen --dev
+
+      - name: Ruff lint
+        run: uv run ruff check app tests
+
+      - name: Ruff format check
+        run: uv run ruff format --check app tests
+
+      # 测试使用 fake 依赖注入，不依赖数据库，因此不引入 MySQL service
+      - name: Pytest
+        run: uv run pytest tests -q
+
+  frontend:
+    name: Frontend Lint & Build
+    needs: changes
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend-web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # package.json 未声明 packageManager 字段，故在此显式指定主版本（与本机 pnpm 11 一致）
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+          cache-dependency-path: frontend-web/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm type-check
+
+      - name: Build
+        run: pnpm build

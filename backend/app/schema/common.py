@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -15,7 +15,7 @@ T = TypeVar("T")
 PageList = list[T]
 
 
-class ApiResponse(BaseModel, Generic[T]):
+class ApiResponse[T](BaseModel):
     """统一响应体：成功与失败都返回这个形状。
 
     code 约定：0 成功；非 0 为业务错误码，如 40400 对应 404。
@@ -30,12 +30,12 @@ class ApiResponse(BaseModel, Generic[T]):
     )
 
 
-def ok(data: T | None = None, message: str = "ok") -> ApiResponse[T]:
+def ok[T](data: T | None = None, message: str = "ok") -> ApiResponse[T]:
     """成功响应快捷构造。"""
     return ApiResponse[T](code=0, message=message, data=data)
 
 
-class Page(BaseModel, Generic[T]):
+class Page[T](BaseModel):
     """分页响应体（对齐 docs/02 §8.1）：list/total/page/page_size 平铺。"""
 
     list: PageList = Field(default_factory=list, description="当前页数据")
