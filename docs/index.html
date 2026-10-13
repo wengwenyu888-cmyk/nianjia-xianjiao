@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>个人作品集 · 念家鲜饺供应链系统</title>
+  <style>
+    :root {
+      --green: #3e9b47;
+      --deep: #2a7a38;
+      --lime: #a9d95e;
+      --gold: #f0b429;
+      --cream: #fbf6ea;
+      --ink: #1a1a1a;
+      --muted: #6b6b6b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+        'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+    /* 毛玻璃导航 */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(251, 246, 234, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(26, 26, 26, 0.06);
+    }
+    nav .wrap {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: 1px; }
+    .brand .dot { color: var(--green); }
+    nav .gh {
+      font-size: 14px; color: var(--muted); text-decoration: none;
+      border: 1px solid rgba(26,26,26,.12); border-radius: 999px; padding: 6px 16px;
+      transition: all .2s;
+    }
+    nav .gh:hover { color: var(--green); border-color: var(--green); }
+    /* Hero */
+    .hero { padding: 96px 0 48px; text-align: center; }
+    .hero .badge {
+      display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: 2px;
+      color: var(--green); border: 1px solid var(--lime); border-radius: 999px;
+      padding: 6px 16px; margin-bottom: 24px;
+    }
+    .hero h1 { font-size: 56px; font-weight: 800; letter-spacing: -1px; line-height: 1.1; }
+    .hero p { font-size: 18px; color: var(--muted); margin-top: 20px; }
+    /* 项目卡片 */
+    .project { padding: 32px 0 96px; }
+    .card {
+      background: #fff; border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+      padding: 48px; display: grid; gap: 32px;
+    }
+    .card h2 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; }
+    .card .desc { color: var(--muted); font-size: 16px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag {
+      font-size: 13px; font-weight: 600; color: var(--deep);
+      background: rgba(169, 217, 94, 0.16); border-radius: 6px; padding: 4px 12px;
+    }
+    .features { list-style: none; display: grid; gap: 12px; }
+    .features li {
+      position: relative; padding-left: 28px; color: #3c3c3c; font-size: 15px;
+    }
+    .features li::before {
+      content: '✓'; position: absolute; left: 0; color: var(--green); font-weight: 800;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--green); color: #fff; text-decoration: none; font-weight: 700;
+      font-size: 17px; border-radius: 999px; padding: 16px 36px;
+      transition: all .2s; box-shadow: 0 4px 16px rgba(62, 155, 71, 0.3);
+    }
+    .btn-primary:hover { background: var(--deep); transform: translateY(-2px); }
+    .btn-gh {
+      color: var(--ink); text-decoration: none; font-weight: 600; font-size: 15px;
+      border-bottom: 2px solid transparent; transition: all .2s;
+    }
+    .btn-gh:hover { border-color: var(--green); color: var(--green); }
+    .more {
+      margin-top: 24px; text-align: center; color: #a0a0a0; font-size: 14px;
+      border: 1px dashed rgba(26,26,26,.15); border-radius: 16px; padding: 32px;
+    }
+    footer { padding: 32px 0; text-align: center; color: #a0a0a0; font-size: 13px; }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 38px; }
+      .card { padding: 28px; }
+      .btn-primary { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="wrap">
+      <div class="brand">作品集<span class="dot">.</span></div>
+      <a class="gh" href="https://github.com/wengwenyu888-cmyk/nianjia-xianjiao" target="_blank" rel="noopener">GitHub 仓库 ↗</a>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <header class="hero">
+      <span class="badge">个人作品集 · PORTFOLIO</span>
+      <h1>从需求到上线，<br />AI 协作驱动的供应链系统</h1>
+      <p>一个真实可用的餐饮连锁供应链平台，正在线上运行。</p>
+    </header>
+
+    <main class="project">
+      <article class="card">
+        <h2>念家鲜饺供应链系统</h2>
+        <p class="desc">
+          面向鲜饺连锁直营门店的供应链管理平台：门店要货 → 总部汇总 → 分拣 →
+          配送 → 签收 → 对账，全链路闭环，含采购入库、批次库存与临期预警、
+          AI 要货建议（规则引擎）。已部署在生产服务器持续运行。
+        </p>
+        <div class="tags">
+          <span class="tag">FastAPI</span>
+          <span class="tag">Vue3 + Element Plus</span>
+          <span class="tag">MySQL 8</span>
+          <span class="tag">Electron 桌面端</span>
+          <span class="tag">Docker 部署</span>
+          <span class="tag">AI 智能体</span>
+        </div>
+        <ul class="features">
+          <li>门店要货 → 汇总 → FIFO 分拣 → 配送 → 电子签收 → 对账全闭环</li>
+          <li>批次库存 + 批次流水双轨记账，结存与流水恒等式一致</li>
+          <li>采购收货入库、临期与低库存自动预警</li>
+          <li>AI 要货建议（近 7 天销量 × 星期系数，结合库存与效期）</li>
+          <li>权限点 RBAC + 门店数据隔离；Windows 桌面客户端</li>
+        </ul>
+        <div class="actions">
+          <a class="btn-primary" href="http://180.76.248.14" target="_blank" rel="noopener">
+            访问线上系统 →
+          </a>
+          <a class="btn-gh" href="https://github.com/wengwenyu888-cmyk/nianjia-xianjiao" target="_blank" rel="noopener">查看源码</a>
+        </div>
+      </article>
+
+      <div class="more">更多项目，敬请期待</div>
+    </main>
+  </div>
+
+  <footer>© 2026 · 念家鲜饺供应链系统 · 部署于百度云</footer>
+</body>
+</html>
