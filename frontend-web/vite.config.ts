@@ -38,9 +38,6 @@ export default defineConfig({
       }
     }
   },
-  // 相对路径：桌面壳（Electron file:// 协议）加载构建产物时必须，
-  // 否则绝对路径资源会 404 白屏。注意 base 是顶层配置，不是 build 子项。
-  base: './',
   build: {
     outDir: 'dist',
     sourcemap: false,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 首页：骨架阶段用欢迎页确认三端与后端连通；展示当前登录用户与桌面客户端下载入口
+// 首页：欢迎页 + 当前登录用户信息 + 按角色显示的业务入口
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -196,22 +196,6 @@ onMounted(async () => {
             <span class="nav-card-arrow" aria-hidden="true">→</span>
           </router-link>
         </div>
-      </section>
-
-      <!--
-        桌面客户端下载入口：安装包由服务器 nginx 以 /downloads/ 静态目录托管，
-        真实文件为 deploy/downloads/njxj-0.1.0-nianjia-xianjiao-desktop.exe（portable 免安装版）。
-      -->
-      <section class="download card">
-        <div class="download-head">
-          <h3>下载桌面客户端（Windows）</h3>
-          <a href="/downloads/njxj-0.1.0-nianjia-xianjiao-desktop.exe" target="_blank" rel="noopener" class="download-link">
-            <el-button type="primary" plain>下载桌面客户端（约 96MB）</el-button>
-          </a>
-        </div>
-        <p class="muted">
-          桌面客户端为同一份网页的 Electron 打包，功能与浏览器访问一致，安装包由服务器 nginx 提供下载。
-        </p>
       </section>
 
       <!-- 业务入口：白卡片 + hover 上浮；按当前用户角色显示，点进对应页面 -->
@@ -418,31 +402,6 @@ onMounted(async () => {
   font-size: 18px;
 }
 
-/* ---- 下载卡片 ---- */
-.download {
-  margin-top: 56px;
-  padding: 28px 32px;
-}
-.download-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.download-head h3 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--nf-ink);
-}
-.download-link {
-  text-decoration: none;
-}
-.download .muted {
-  margin-top: 10px;
-}
-
 /* ---- 业务入口卡片：router-link 白卡片 + hover 上浮 ---- */
 .feature-section {
   display: grid;
@@ -500,8 +459,7 @@ onMounted(async () => {
   .feature-section {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .nav-section,
-  .download {
+  .nav-section {
     margin-top: 40px;
   }
 }

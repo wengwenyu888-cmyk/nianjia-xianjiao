@@ -68,7 +68,15 @@ s1only.txt
 verify.ps1
 opencode-demo/
 _scout-raw/
-desktop/_smoke-result.txt
+desktop/
+_asar/
+_probe/
+_recon/
+_search-probe/
+久雀*.md
+智能体技术选型报告.md
+opencode-demo/
+_scout-raw/
 
 .tmp-asar/
 _plugin-audit/

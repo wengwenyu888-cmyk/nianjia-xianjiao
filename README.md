@@ -3,7 +3,7 @@
 门店要货到签收对账的闭环系统：门店按「斤」要货 → 总部汇总 → 分拣称重 → 司机配送 →
 门店电子签收 → 门店盈亏对账。
 
-- 技术栈：FastAPI（Python 3.12）+ MySQL 8 + Vue3 / Element Plus（响应式网页端：总部后台 + 门店端 + 司机端）+ Electron 桌面壳（Windows）
+- 技术栈：FastAPI（Python 3.12）+ MySQL 8 + Vue3 / Element Plus（响应式网页端：总部后台 + 门店端 + 司机端）
 - 部署定稿：轻量应用服务器 + Docker 起步，数据库用云 RDS MySQL；门店量增长后再迁 TKE
 - 仓库：GitHub 私有仓库；规范以 `docs/05-工程基座方案.md` 为唯一权威
 
@@ -23,7 +23,6 @@ backend/        FastAPI 服务（总部 API，三端共用）
   alembic/      数据库迁移（只前进不回滚）
   tests/        pytest：unit + api（TestClient）
 frontend-web/   响应式网页端：总部后台 + 门店端 + 司机端（Vue3 + Element Plus + Vite + Pinia + vue-router）
-desktop/        Electron 桌面壳：包装 frontend-web 同一份网页（dev 加载 dev server，生产加载 dist 产物；electron-builder 打 Windows 安装包）
 deploy/         Dockerfile、docker-compose.yml、nginx.conf、.env.example
 docs/           业务手册、架构设计、里程碑、工程基座方案
 ```
@@ -90,12 +89,6 @@ pnpm build                    # 生产构建产物在 dist/
 ```
 
 前端通过 `VITE_API_BASE_URL` 找后端；默认 `/api/v1` 走 Vite 代理到 `http://127.0.0.1:8000`。
-
-### 2.5 桌面壳（Windows，可选）
-
-dev：先起 2.4 的 `pnpm dev`，再 `cd desktop && pnpm install && pnpm dev`，桌面窗口即加载 `http://127.0.0.1:5173`。
-
-打包：`cd frontend-web && pnpm build` 生成 `dist/`，再 `cd desktop && pnpm dist`，electron-builder 输出 Windows nsis 安装包到 `desktop/release/`。
 
 ---
 
